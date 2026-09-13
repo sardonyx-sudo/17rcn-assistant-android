@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_light">
+
+    <!-- 頂部標題與狀態列 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/primary_green"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:elevation="4dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/app_name"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnHeaderRefresh"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="🔄 刷新"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:background="@drawable/btn_pill_translucent"
+            style="?android:attr/borderlessButtonStyle" />
+    </LinearLayout>
+
+    <!-- 主分頁標籤導航 -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="#FFFFFF"
+        app:tabIndicatorColor="@color/primary_green"
+        app:tabSelectedTextColor="@color/primary_green"
+        app:tabTextColor="@color/text_secondary"
+        android:elevation="2dp">
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tab_queue" />
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tab_browser" />
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tab_settings" />
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- 內容容器 -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- 1. 待刊物資佇列頁面 -->
+        <LinearLayout
+            android:id="@+id/layoutQueue"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <ProgressBar
+                android:id="@+id/queueProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="40dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvQueueStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="20dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="15sp"
+                android:visibility="gone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvQueue"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="12dp"
+                android:clipToPadding="false" />
+        </LinearLayout>
+
+        <!-- 2. 17rcn 刊登網頁頁面 -->
+        <LinearLayout
+            android:id="@+id/layoutBrowser"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- 網頁頂部操作懸浮列 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#E6F4EA"
+                android:padding="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvStagedItemName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="準備刊登：無"
+                    android:textColor="#137333"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:singleLine="true"
+                    android:ellipsize="end" />
+
+                <Button
+                    android:id="@+id/btnReinject"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="⚡ 填入資料"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/btn_pill_green"
+                    android:textSize="12sp"
+                    android:paddingHorizontal="12dp"
+                    style="?android:attr/borderlessButtonStyle" />
+
+                <Button
+                    android:id="@+id/btnBackQueue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="返回清單"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:layout_marginStart="6dp"
+                    style="?android:attr/borderlessButtonStyle" />
+            </LinearLayout>
+
+            <!-- 嵌入式 Chromium WebView -->
+            <WebView
+                android:id="@+id/webView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+
+        <!-- 3. 設定頁面 -->
+        <ScrollView
+            android:id="@+id/layoutSettings"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Google Apps Script (GAS) 部署網址"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:layout_marginTop="8dp" />
+
+                <EditText
+                    android:id="@+id/etGasUrl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="https://script.google.com/macros/s/.../exec"
+                    android:inputType="textUri"
+                    android:textSize="14sp"
+                    android:layout_marginTop="6dp"
+                    android:padding="12dp"
+                    android:background="@drawable/edittext_border" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="預設自取地址 (可選填)"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:layout_marginTop="16dp" />
+
+                <EditText
+                    android:id="@+id/etDefaultAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="例如：台北市大安區新生南路一段..."
+                    android:inputType="textPostalAddress"
+                    android:textSize="14sp"
+                    android:layout_marginTop="6dp"
+                    android:padding="12dp"
+                    android:background="@drawable/edittext_border" />
+
+                <Button
+                    android:id="@+id/btnSaveSettings"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="@string/btn_save_settings"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/btn_pill_green"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="24dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="💡 提示：\n1. 設定完成後切換回「待刊物資佇列」，點擊刷新即可即時讀取志工上傳的物資！\n2. 初次使用請在「17rcn 刊登網頁」中登入您的帳號，App 會自動記憶登入狀態，免每次重新輸入帳密。"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="4dp"
+                    android:layout_marginTop="24dp"
+                    android:padding="16dp"
+                    android:background="#F1F3F4" />
+            </LinearLayout>
+        </ScrollView>
+
+    </FrameLayout>
+</LinearLayout>
