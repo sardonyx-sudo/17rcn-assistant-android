@@ -7,6 +7,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch: # 支援在 GitHub 網頁上一鍵手動觸發編譯
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: 編譯 Android APK
@@ -35,9 +38,21 @@ jobs:
           fi
           ./gradlew assembleDebug --stacktrace
 
-      - name: 上傳 APK 安裝檔供直接下載
+      - name: 上傳 Artifacts 產出物 (保留30天)
         uses: actions/upload-artifact@v4
         with:
           name: 扶輪公益網刊登助手-Android-APK
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 30
+
+      - name: 發布至 GitHub Releases (免登入一鍵直裝 APK)
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "扶輪公益網刊登助手 最新 Android 版本"
+          body: "扶輪公益網 (17rcn.org) 專屬 Android App。點擊下方 Assets 中的 APK 檔案即可直接在手機下載安裝，無需解壓縮！"
+          files: app/build/outputs/apk/debug/*.apk
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
