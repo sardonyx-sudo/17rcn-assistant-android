@@ -6,6 +6,8 @@ import android.view.View
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
@@ -30,7 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var queueAdapter: QueueAdapter
 
     private var currentStagedItem: GoodsItem? = null
-    private val goodsAddUrl = "https://17rcn.org/goods/goods_add.php"
+    private val goodsAddUrl = "https://www.17rcn.org/member/goods_add.php"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,6 +103,7 @@ class MainActivity : AppCompatActivity() {
         settings.setSupportZoom(true)
         settings.builtInZoomControls = true
         settings.displayZoomControls = false
+        settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
 
         // 保持 Session Cookie
         val cookieManager = CookieManager.getInstance()
@@ -109,9 +112,13 @@ class MainActivity : AppCompatActivity() {
 
         webView.webChromeClient = WebChromeClient()
         webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                return false
+            }
+
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                if (url != null && url.contains("goods_add")) {
+                if (url != null && url.contains("goods_add.php")) {
                     if (currentStagedItem != null) {
                         injectCurrentStagedItem()
                     }
