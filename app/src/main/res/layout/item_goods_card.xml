@@ -74,17 +74,61 @@
             android:ellipsize="end"
             android:layout_marginTop="6dp" />
 
-        <Button
-            android:id="@+id/btnPublishThis"
+        <!-- 操作按鈕列 (50% 刊登 : 25% 重辨識 : 25% 刪除) -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:text="@string/btn_start_publish"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:background="@drawable/btn_pill_green"
-            android:layout_marginTop="14dp"
-            style="?android:attr/borderlessButtonStyle" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+
+            <Button
+                android:id="@+id/btnPublishThis"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="2"
+                android:text="@string/btn_publish_item"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:background="@drawable/btn_pill_green"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:includeFontPadding="false"
+                style="?android:attr/borderlessButtonStyle" />
+
+            <Button
+                android:id="@+id/btnReprocessThis"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:text="@string/btn_reprocess_item"
+                android:textColor="@color/btn_blue_text"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:background="@drawable/btn_pill_blue"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:includeFontPadding="false"
+                style="?android:attr/borderlessButtonStyle" />
+
+            <Button
+                android:id="@+id/btnDeleteThis"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:text="@string/btn_delete_item"
+                android:textColor="@color/btn_red_text"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:background="@drawable/btn_pill_red"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:includeFontPadding="false"
+                style="?android:attr/borderlessButtonStyle" />
+
+        </LinearLayout>
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

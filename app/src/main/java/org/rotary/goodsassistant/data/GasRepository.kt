@@ -91,6 +91,67 @@ class GasRepository {
         }
     }
 
+    suspend fun reprocessRow(gasUrl: String, row: Int, model: String = ""): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            var targetUrl = appendParam(gasUrl, "action", "reprocessRow")
+            targetUrl = "$targetUrl&row=$row"
+            if (model.isNotBlank()) {
+                targetUrl = "$targetUrl&model=$model"
+            }
+            val request = Request.Builder()
+                .url(targetUrl)
+                .get()
+                .header("Accept", "application/json")
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    return@withContext Result.failure(Exception("HTTP 錯誤 ${response.code}"))
+                }
+                val bodyStr = response.body?.string() ?: ""
+                val gasResponse = gson.fromJson(bodyStr, GasResponse::class.java)
+                if (gasResponse.success) {
+                    Result.success(Unit)
+                } else {
+                    val errMsg = gasResponse.error ?: gasResponse.message ?: "重新辨識失敗"
+                    Result.failure(Exception(errMsg))
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("GasRepository", "reprocessRow failed", e)
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteItem(gasUrl: String, row: Int): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            var targetUrl = appendParam(gasUrl, "action", "deleteItem")
+            targetUrl = "$targetUrl&row=$row"
+            val request = Request.Builder()
+                .url(targetUrl)
+                .get()
+                .header("Accept", "application/json")
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    return@withContext Result.failure(Exception("HTTP 錯誤 ${response.code}"))
+                }
+                val bodyStr = response.body?.string() ?: ""
+                val gasResponse = gson.fromJson(bodyStr, GasResponse::class.java)
+                if (gasResponse.success) {
+                    Result.success(Unit)
+                } else {
+                    val errMsg = gasResponse.error ?: gasResponse.message ?: "刪除物資失敗"
+                    Result.failure(Exception(errMsg))
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("GasRepository", "deleteItem failed", e)
+            Result.failure(e)
+        }
+    }
+
     suspend fun preparePhotosBase64(photos: List<PhotoItem>, gasUrl: String): List<PhotoItem> = withContext(Dispatchers.IO) {
         photos.take(3).map { photo ->
             var loaded = false

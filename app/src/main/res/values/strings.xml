@@ -12,4 +12,11 @@
     <string name="btn_save_settings">儲存設定</string>
     <string name="status_loading">連線雲端試算表中...</string>
     <string name="status_empty">目前試算表中沒有「待刊登」的物資！</string>
+    <string name="btn_publish_item">⚡ 刊登此物資</string>
+    <string name="btn_reprocess_item">🔄 重辨識</string>
+    <string name="btn_delete_item">🗑️ 刪除</string>
+    <string name="dialog_delete_title">確認刪除物資</string>
+    <string name="dialog_delete_message">確定要永久刪除物資【%1$s】（試算表第 %2$d 列）嗎？\n\n⚠️ 此操作將同時把 Google Drive 中的照片移至垃圾桶以釋放空間，且無法復原！</string>
+    <string name="dialog_delete_confirm">確認刪除</string>
+    <string name="dialog_cancel">取消</string>
 </resources>

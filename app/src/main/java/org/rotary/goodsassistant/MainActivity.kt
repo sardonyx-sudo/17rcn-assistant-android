@@ -47,9 +47,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupViews() {
         // 1. RecyclerView 待刊佇列
-        queueAdapter = QueueAdapter { item ->
-            startPublishItem(item)
-        }
+        queueAdapter = QueueAdapter(
+            onPublishClick = { item -> startPublishItem(item) },
+            onReprocessClick = { item -> reprocessItem(item) },
+            onDeleteClick = { item -> confirmDeleteItem(item) }
+        )
         binding.rvQueue.layoutManager = LinearLayoutManager(this)
         binding.rvQueue.adapter = queueAdapter
 
@@ -211,6 +213,78 @@ class MainActivity : AppCompatActivity() {
         val script = GoodsInjector.buildInjectionScript(item, prefs.defaultAddress)
         binding.webView.evaluateJavascript(script) { result ->
             Toast.makeText(this, "⚡ 物資資料已自動填入！請確認後輸入驗證碼送出", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun reprocessItem(item: GoodsItem) {
+        val gasUrl = prefs.gasUrl
+        if (gasUrl.isBlank()) {
+            Toast.makeText(this, "⚠️ 請先至偏好設定輸入 GAS 部署網址", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        binding.queueProgressBar.visibility = View.VISIBLE
+        Toast.makeText(this, "⏳ 正在重新 AI 辨識第 ${item.row} 列物資...", Toast.LENGTH_SHORT).show()
+
+        lifecycleScope.launch {
+            val result = gasRepo.reprocessRow(gasUrl, item.row)
+            binding.queueProgressBar.visibility = View.GONE
+            result.onSuccess {
+                Toast.makeText(this@MainActivity, "🎉 第 ${item.row} 列物資已重新辨識完成！", Toast.LENGTH_SHORT).show()
+                refreshQueue()
+            }.onFailure { err ->
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("❌ 重新辨識失敗")
+                    .setMessage(err.message ?: "發生未知的錯誤")
+                    .setPositiveButton("確定", null)
+                    .show()
+            }
+        }
+    }
+
+    private fun confirmDeleteItem(item: GoodsItem) {
+        val gasUrl = prefs.gasUrl
+        if (gasUrl.isBlank()) {
+            Toast.makeText(this, "⚠️ 請先至偏好設定輸入 GAS 部署網址", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (item.status == "刊登中") {
+            Toast.makeText(this, "⚠️ 此物資目前正在刊登中，無法刪除！", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val itemName = item.title?.ifBlank { null } ?: "無品名"
+        val message = getString(R.string.dialog_delete_message, itemName, item.row)
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_delete_title)
+            .setMessage(message)
+            .setPositiveButton(R.string.dialog_delete_confirm) { _, _ ->
+                executeDeleteItem(item)
+            }
+            .setNegativeButton(R.string.dialog_cancel, null)
+            .show()
+    }
+
+    private fun executeDeleteItem(item: GoodsItem) {
+        val gasUrl = prefs.gasUrl
+        binding.queueProgressBar.visibility = View.VISIBLE
+        Toast.makeText(this, "⏳ 正在刪除第 ${item.row} 列物資與雲端照片...", Toast.LENGTH_SHORT).show()
+
+        lifecycleScope.launch {
+            val result = gasRepo.deleteItem(gasUrl, item.row)
+            binding.queueProgressBar.visibility = View.GONE
+            result.onSuccess {
+                Toast.makeText(this@MainActivity, "✅ 第 ${item.row} 列物資已成功刪除！", Toast.LENGTH_SHORT).show()
+                refreshQueue()
+            }.onFailure { err ->
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("❌ 刪除失敗")
+                    .setMessage(err.message ?: "無法完成刪除")
+                    .setPositiveButton("確定", null)
+                    .show()
+            }
         }
     }
 

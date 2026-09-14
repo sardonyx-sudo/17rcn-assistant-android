@@ -7,7 +7,9 @@ import org.rotary.goodsassistant.databinding.ItemGoodsCardBinding
 import org.rotary.goodsassistant.model.GoodsItem
 
 class QueueAdapter(
-    private val onPublishClick: (GoodsItem) -> Unit
+    private val onPublishClick: (GoodsItem) -> Unit,
+    private val onReprocessClick: (GoodsItem) -> Unit,
+    private val onDeleteClick: (GoodsItem) -> Unit
 ) : RecyclerView.Adapter<QueueAdapter.ViewHolder>() {
 
     private val items = mutableListOf<GoodsItem>()
@@ -46,6 +48,12 @@ class QueueAdapter(
 
             binding.btnPublishThis.setOnClickListener {
                 onPublishClick(item)
+            }
+            binding.btnReprocessThis.setOnClickListener {
+                onReprocessClick(item)
+            }
+            binding.btnDeleteThis.setOnClickListener {
+                onDeleteClick(item)
             }
         }
     }
