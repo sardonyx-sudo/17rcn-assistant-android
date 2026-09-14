@@ -89,6 +89,8 @@ class MainActivity : AppCompatActivity() {
             binding.tabLayout.getTabAt(0)?.select()
             refreshQueue()
         }
+
+        switchTab(0)
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -216,6 +218,7 @@ class MainActivity : AppCompatActivity() {
         binding.layoutQueue.visibility = if (tabIndex == 0) View.VISIBLE else View.GONE
         binding.layoutBrowser.visibility = if (tabIndex == 1) View.VISIBLE else View.GONE
         binding.layoutSettings.visibility = if (tabIndex == 2) View.VISIBLE else View.GONE
+        binding.btnHeaderRefresh.visibility = if (tabIndex == 0) View.VISIBLE else View.GONE
     }
 
     inner class WebAppInterface {
