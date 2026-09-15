@@ -1,17 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary_green">#0F9D58</color>
-    <color name="primary_green_dark">#0B8043</color>
-    <color name="accent_green">#34A853</color>
-    <color name="bg_light">#F8F9FA</color>
+    <!-- 方案 B：極簡奶霜燕麥米核心色票 -->
+    <color name="primary_beige">#F4EFEA</color>
+    <color name="primary_beige_dark">#EAE2D8</color>
+    <color name="accent_beige">#D0C4B4</color>
+
+    <!-- 介面基底與文字 -->
+    <color name="bg_light">#FBF9F6</color>
     <color name="card_bg">#FFFFFF</color>
-    <color name="text_primary">#202124</color>
-    <color name="text_secondary">#5F6368</color>
-    <color name="border_color">#DADCE0</color>
-    <color name="badge_bg">#E6F4EA</color>
-    <color name="badge_text">#137333</color>
-    <color name="btn_blue_bg">#E8F0FE</color>
-    <color name="btn_blue_text">#1A73E8</color>
+    <color name="text_primary">#362F29</color>
+    <color name="text_secondary">#8C8074</color>
+    <color name="border_color">#EAE4DD</color>
+
+    <!-- 狀態標籤 (燕麥色) -->
+    <color name="badge_bg">#EFE8DE</color>
+    <color name="badge_text">#5C4F43</color>
+
+    <!-- 主行動按鈕 (深奶茶膠囊) -->
+    <color name="btn_cta_bg">#D0C4B4</color>
+    <color name="btn_cta_text">#3E342B</color>
+
+    <!-- 次要操作按鈕 (AI重辨 - 暖灰褐) -->
+    <color name="btn_blue_bg">#F2ECE4</color>
+    <color name="btn_blue_text">#6E5F52</color>
+
+    <!-- 危險操作按鈕 (刪除 - 柔和紅) -->
     <color name="btn_red_bg">#FCE8E6</color>
     <color name="btn_red_text">#D93025</color>
 </resources>

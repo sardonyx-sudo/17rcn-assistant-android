@@ -11,22 +11,32 @@ android {
         applicationId = "org.rotary.goodsassistant"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        create("sharedKey") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("sharedKey")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
         debug {
-            applicationIdSuffix = ".debug"
+            signingConfig = signingConfigs.getByName("sharedKey")
             isDebuggable = true
         }
     }
@@ -52,6 +62,10 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // 相機、相簿與圖片 EXIF 轉向校正
+    implementation("androidx.activity:activity-ktx:1.8.2")
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
 
     // 網路請求 (GAS Web App 連線) 與 JSON 解析
     implementation("com.squareup.okhttp3:okhttp:4.12.0")

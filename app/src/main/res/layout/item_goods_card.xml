@@ -87,7 +87,7 @@
                 android:layout_height="40dp"
                 android:layout_weight="2"
                 android:text="@string/btn_publish_item"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/btn_cta_text"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:background="@drawable/btn_pill_green"

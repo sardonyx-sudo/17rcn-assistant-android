@@ -1,12 +1,13 @@
 <resources>
     <string name="app_name">扶輪公益網 刊登助手</string>
-    <string name="tab_queue">待刊物資佇列</string>
-    <string name="tab_browser">17rcn 刊登網頁</string>
-    <string name="tab_settings">偏好設定</string>
+    <string name="tab_capture">📸 拍照採集</string>
+    <string name="tab_queue">📋 物資佇列</string>
+    <string name="tab_browser">🌐 17rcn 刊登</string>
+    <string name="tab_settings">⚙️ 偏好設定</string>
     <string name="btn_refresh">重新整理佇列</string>
     <string name="btn_start_publish">⚡ 一鍵填入並前往刊登</string>
-    <string name="btn_reinject">⚡ 再次填入物資資料</string>
-    <string name="btn_back_to_queue">返回物資清單</string>
+    <string name="btn_reinject">⚡ 填入資料</string>
+    <string name="btn_back_to_queue">返回清單</string>
     <string name="hint_gas_url">Google Apps Script (GAS) 部署網址</string>
     <string name="hint_default_address">預設自取地址 (例如：會館/服務處)</string>
     <string name="btn_save_settings">儲存設定</string>
@@ -19,4 +20,13 @@
     <string name="dialog_delete_message">確定要永久刪除物資【%1$s】（試算表第 %2$d 列）嗎？\n\n⚠️ 此操作將同時把 Google Drive 中的照片移至垃圾桶以釋放空間，且無法復原！</string>
     <string name="dialog_delete_confirm">確認刪除</string>
     <string name="dialog_cancel">取消</string>
+
+    <!-- 拍照採集相關文字 -->
+    <string name="label_capture_photos">📸 物資相片 (最多 3 張，至少 1 張)</string>
+    <string name="btn_take_photo">📸 拍照</string>
+    <string name="btn_choose_gallery">🖼️ 相簿</string>
+    <string name="label_capture_address">📍 所在地址</string>
+    <string name="label_capture_note">📝 物資現況 / 備註補充 (選填)</string>
+    <string name="hint_capture_note">例如：外觀良好功能正常，附電源線，僅表面有微細刮痕...</string>
+    <string name="btn_upload_and_recognize">🚀 上傳至雲端並啟動 AI 辨識</string>
 </resources>

@@ -204,4 +204,53 @@ class GasRepository {
             photo
         }
     }
+
+    suspend fun uploadItem(
+        gasUrl: String,
+        photosBase64: List<String>,
+        address: String,
+        note: String
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            if (gasUrl.isBlank()) {
+                return@withContext Result.failure(IllegalArgumentException("尚未設定 Google Apps Script 網址"))
+            }
+
+            val payloadMap = mapOf(
+                "action" to "uploadItem",
+                "photos" to photosBase64,
+                "address" to address,
+                "note" to note
+            )
+            val jsonPayload = gson.toJson(payloadMap)
+            val requestBody = okhttp3.RequestBody.create(
+                okhttp3.MediaType.parse("application/json; charset=utf-8"),
+                jsonPayload
+            )
+
+            val request = Request.Builder()
+                .url(gasUrl)
+                .post(requestBody)
+                .header("Accept", "application/json")
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    return@withContext Result.failure(Exception("HTTP 錯誤 ${response.code}"))
+                }
+                val bodyStr = response.body?.string() ?: ""
+                val gasResponse = gson.fromJson(bodyStr, GasResponse::class.java)
+                if (gasResponse.success) {
+                    Result.success(Unit)
+                } else {
+                    val errMsg = gasResponse.error ?: gasResponse.message ?: "拍照上傳失敗"
+                    Result.failure(Exception(errMsg))
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("GasRepository", "uploadItem failed", e)
+            Result.failure(e)
+        }
+    }
 }
+
