@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.RotaryGoodsAssistant" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/accent_beige</item>
-        <item name="colorPrimaryVariant">@color/primary_beige_dark</item>
+        <item name="colorPrimary">@color/primary_caramel</item>
+        <item name="colorPrimaryVariant">@color/primary_caramel_dark</item>
         <item name="colorSecondary">@color/accent_beige</item>
+        <item name="colorSurface">@color/card_bg</item>
+        <item name="android:colorBackground">@color/bg_light</item>
         <item name="android:statusBarColor">@color/primary_beige</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>

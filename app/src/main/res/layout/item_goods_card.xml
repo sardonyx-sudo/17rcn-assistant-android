@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp"
+    android:layout_marginBottom="14dp"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="3dp"
     app:strokeColor="@color/border_color"
     app:strokeWidth="1dp"
-    app:cardBackgroundColor="#FFFFFF">
+    app:cardBackgroundColor="@color/card_bg">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,6 +16,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- 頂部分類與數量標籤 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -29,9 +30,9 @@
                 android:text="家電生活"
                 android:textColor="@color/badge_text"
                 android:background="@drawable/badge_bg"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="3dp"
-                android:textSize="11sp"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -44,16 +45,18 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
+        <!-- 物資品名標題 -->
         <TextView
             android:id="@+id/tvCardTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="九成新微波爐"
             android:textColor="@color/text_primary"
-            android:textSize="16sp"
+            android:textSize="17sp"
             android:textStyle="bold"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="10dp" />
 
+        <!-- 所在地址 -->
         <TextView
             android:id="@+id/tvCardAddress"
             android:layout_width="match_parent"
@@ -61,8 +64,9 @@
             android:text="📍 台北市大安區"
             android:textColor="@color/text_secondary"
             android:textSize="13sp"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="6dp" />
 
+        <!-- 說明簡述 -->
         <TextView
             android:id="@+id/tvCardDesc"
             android:layout_width="match_parent"
@@ -72,59 +76,61 @@
             android:textSize="13sp"
             android:maxLines="2"
             android:ellipsize="end"
+            android:lineSpacingExtra="2dp"
             android:layout_marginTop="6dp" />
 
-        <!-- 操作按鈕列 (50% 刊登 : 25% 重辨識 : 25% 刪除) -->
+        <!-- 操作按鈕列 (焦糖刊登主按鈕 + 重辨 + 刪除) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="12dp">
+            android:gravity="center_vertical"
+            android:layout_marginTop="14dp">
 
             <Button
                 android:id="@+id/btnPublishThis"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="2"
+                android:layout_height="42dp"
+                android:layout_weight="2.2"
                 android:text="@string/btn_publish_item"
                 android:textColor="@color/btn_cta_text"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:background="@drawable/btn_pill_green"
-                android:paddingStart="4dp"
-                android:paddingEnd="4dp"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
                 android:includeFontPadding="false"
                 style="?android:attr/borderlessButtonStyle" />
 
             <Button
                 android:id="@+id/btnReprocessThis"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="42dp"
                 android:layout_weight="1"
-                android:layout_marginStart="6dp"
+                android:layout_marginStart="8dp"
                 android:text="@string/btn_reprocess_item"
                 android:textColor="@color/btn_blue_text"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:background="@drawable/btn_pill_blue"
-                android:paddingStart="2dp"
-                android:paddingEnd="2dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
                 android:includeFontPadding="false"
                 style="?android:attr/borderlessButtonStyle" />
 
             <Button
                 android:id="@+id/btnDeleteThis"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
+                android:layout_height="42dp"
+                android:layout_weight="0.9"
+                android:layout_marginStart="8dp"
                 android:text="@string/btn_delete_item"
                 android:textColor="@color/btn_red_text"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:background="@drawable/btn_pill_red"
-                android:paddingStart="2dp"
-                android:paddingEnd="2dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
                 android:includeFontPadding="false"
                 style="?android:attr/borderlessButtonStyle" />
 

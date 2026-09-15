@@ -1,30 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 方案 B：極簡奶霜燕麥米核心色票 -->
-    <color name="primary_beige">#F4EFEA</color>
-    <color name="primary_beige_dark">#EAE2D8</color>
-    <color name="accent_beige">#D0C4B4</color>
+    <!-- 方案 2：日系溫暖焦糖米核心色票 -->
+    <color name="primary_caramel">#8C6239</color>
+    <color name="primary_caramel_dark">#6E4E2D</color>
+    <color name="primary_beige">#EDE6DB</color>
+    <color name="primary_beige_dark">#DFD5C6</color>
+    <color name="accent_beige">#8C6239</color>
 
     <!-- 介面基底與文字 -->
-    <color name="bg_light">#FBF9F6</color>
+    <color name="bg_light">#FAF7F2</color>
     <color name="card_bg">#FFFFFF</color>
-    <color name="text_primary">#362F29</color>
-    <color name="text_secondary">#8C8074</color>
-    <color name="border_color">#EAE4DD</color>
+    <color name="text_primary">#2D2620</color>
+    <color name="text_secondary">#7A7067</color>
+    <color name="border_color">#E2DBD0</color>
 
-    <!-- 狀態標籤 (燕麥色) -->
-    <color name="badge_bg">#EFE8DE</color>
-    <color name="badge_text">#5C4F43</color>
+    <!-- 狀態標籤 (燕麥金底 + 焦糖深褐字) -->
+    <color name="badge_bg">#F2EBD9</color>
+    <color name="badge_text">#6E4E2D</color>
 
-    <!-- 主行動按鈕 (深奶茶膠囊) -->
-    <color name="btn_cta_bg">#D0C4B4</color>
-    <color name="btn_cta_text">#3E342B</color>
+    <!-- 主行動按鈕 (焦糖暖褐 + 純白字，高對比度清晰引導) -->
+    <color name="btn_cta_bg">#8C6239</color>
+    <color name="btn_cta_text">#FFFFFF</color>
 
-    <!-- 次要操作按鈕 (AI重辨 - 暖灰褐) -->
-    <color name="btn_blue_bg">#F2ECE4</color>
-    <color name="btn_blue_text">#6E5F52</color>
+    <!-- 次要操作按鈕 (AI重辨 - 暖砂淡褐) -->
+    <color name="btn_blue_bg">#F7EFE6</color>
+    <color name="btn_blue_text">#8C6239</color>
 
-    <!-- 危險操作按鈕 (刪除 - 柔和紅) -->
+    <!-- 危險操作按鈕 (刪除 - 柔和粉紅) -->
     <color name="btn_red_bg">#FCE8E6</color>
     <color name="btn_red_text">#D93025</color>
+
+    <!-- 導航列顏色 -->
+    <color name="nav_active">#8C6239</color>
+    <color name="nav_inactive">#8A7F75</color>
+    <color name="nav_indicator">#F2EBD9</color>
 </resources>

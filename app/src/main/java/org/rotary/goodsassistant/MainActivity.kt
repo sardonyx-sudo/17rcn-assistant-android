@@ -24,7 +24,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.launch
 import org.rotary.goodsassistant.data.GasRepository
 import org.rotary.goodsassistant.data.PreferencesManager
@@ -104,14 +103,28 @@ class MainActivity : AppCompatActivity() {
         binding.rvQueue.layoutManager = LinearLayoutManager(this)
         binding.rvQueue.adapter = queueAdapter
 
-        // 2. 標籤列切換監聽 (4分頁: 0=採集, 1=佇列, 2=瀏覽器, 3=設定)
-        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                tab?.position?.let { switchTab(it) }
+        // 2. 底部導航切換監聽 (4分頁: 0=採集, 1=佇列, 2=瀏覽器, 3=設定)
+        binding.bottomNavigation.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_capture -> {
+                    switchTab(0)
+                    true
+                }
+                R.id.nav_queue -> {
+                    switchTab(1)
+                    true
+                }
+                R.id.nav_browser -> {
+                    switchTab(2)
+                    true
+                }
+                R.id.nav_settings -> {
+                    switchTab(3)
+                    true
+                }
+                else -> false
             }
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-        })
+        }
 
         // 3. 頂部按鈕監聽
         binding.btnHeaderRefresh.setOnClickListener {
@@ -119,7 +132,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnBackQueue.setOnClickListener {
-            binding.tabLayout.getTabAt(1)?.select()
+            selectTab(1)
         }
 
         binding.btnReinject.setOnClickListener {
@@ -134,11 +147,11 @@ class MainActivity : AppCompatActivity() {
             prefs.defaultAddress = addr
             binding.etCaptureAddress.setText(addr)
             Toast.makeText(this, "✅ 設定已儲存", Toast.LENGTH_SHORT).show()
-            binding.tabLayout.getTabAt(1)?.select()
+            selectTab(1)
             refreshQueue()
         }
 
-        switchTab(0)
+        selectTab(0)
     }
 
     private fun setupCaptureTab() {
@@ -242,7 +255,7 @@ class MainActivity : AppCompatActivity() {
         val gasUrl = prefs.gasUrl
         if (gasUrl.isBlank()) {
             Toast.makeText(this, "⚠️ 請先至「偏好設定」輸入 Google Apps Script 網址", Toast.LENGTH_LONG).show()
-            binding.tabLayout.getTabAt(3)?.select()
+            selectTab(3)
             return
         }
 
@@ -270,7 +283,7 @@ class MainActivity : AppCompatActivity() {
                 updatePhotoSlotsUI()
                 binding.etCaptureNote.setText("")
                 // 切換至物資佇列分頁並自動刷新
-                binding.tabLayout.getTabAt(1)?.select()
+                selectTab(1)
                 refreshQueue()
             }.onFailure { err ->
                 AlertDialog.Builder(this@MainActivity)
@@ -391,7 +404,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             // 切換至 WebView 分頁 (Tab 2) 並載入刊登頁面
-            binding.tabLayout.getTabAt(2)?.select()
+            selectTab(2)
             val currentUrl = binding.webView.url
             if (currentUrl != null && currentUrl.contains("goods_add.php")) {
                 injectCurrentStagedItem()
@@ -491,6 +504,21 @@ class MainActivity : AppCompatActivity() {
         binding.btnHeaderRefresh.visibility = if (tabIndex == 1) View.VISIBLE else View.GONE
     }
 
+    private fun selectTab(tabIndex: Int) {
+        val targetMenuId = when (tabIndex) {
+            0 -> R.id.nav_capture
+            1 -> R.id.nav_queue
+            2 -> R.id.nav_browser
+            3 -> R.id.nav_settings
+            else -> R.id.nav_queue
+        }
+        if (binding.bottomNavigation.selectedItemId != targetMenuId) {
+            binding.bottomNavigation.selectedItemId = targetMenuId
+        } else {
+            switchTab(tabIndex)
+        }
+    }
+
     inner class WebAppInterface {
         @JavascriptInterface
         fun onFormSubmitted() {
@@ -511,7 +539,7 @@ class MainActivity : AppCompatActivity() {
                     .setPositiveButton("返回物資佇列") { _, _ ->
                         currentStagedItem = null
                         binding.tvStagedItemName.text = "📦 準備刊登：無"
-                        binding.tabLayout.getTabAt(1)?.select()
+                        selectTab(1)
                         refreshQueue()
                     }
                     .setCancelable(false)
@@ -525,7 +553,7 @@ class MainActivity : AppCompatActivity() {
         if (binding.layoutBrowser.visibility == View.VISIBLE && binding.webView.canGoBack()) {
             binding.webView.goBack()
         } else if (binding.layoutBrowser.visibility == View.VISIBLE || binding.layoutSettings.visibility == View.VISIBLE || binding.layoutCapture.visibility == View.VISIBLE) {
-            binding.tabLayout.getTabAt(1)?.select()
+            selectTab(1)
         } else {
             super.onBackPressed()
         }
