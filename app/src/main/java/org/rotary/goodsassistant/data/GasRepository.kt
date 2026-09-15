@@ -5,8 +5,10 @@ import android.util.Log
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.rotary.goodsassistant.model.GasImageResponse
 import org.rotary.goodsassistant.model.GasResponse
 import org.rotary.goodsassistant.model.GoodsItem
@@ -223,10 +225,8 @@ class GasRepository {
                 "note" to note
             )
             val jsonPayload = gson.toJson(payloadMap)
-            val requestBody = okhttp3.RequestBody.create(
-                okhttp3.MediaType.parse("application/json; charset=utf-8"),
-                jsonPayload
-            )
+            val mediaType = "application/json; charset=utf-8".toMediaType()
+            val requestBody = jsonPayload.toRequestBody(mediaType)
 
             val request = Request.Builder()
                 .url(gasUrl)
