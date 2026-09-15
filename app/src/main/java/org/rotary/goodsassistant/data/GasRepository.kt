@@ -17,8 +17,9 @@ import java.util.concurrent.TimeUnit
 
 class GasRepository {
     private val client = OkHttpClient.Builder()
-        .connectTimeout(20, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
         .followRedirects(true)
         .followSslRedirects(true)
         .build()
