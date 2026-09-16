@@ -398,9 +398,18 @@ class MainActivity : AppCompatActivity() {
             binding.webView.loadUrl(targetGoodsAddUrl)
         }
 
-        // 2. 背景非同步預載照片 Base64 與鎖定列
+        // 2. 換筆自動解鎖：若先前已有鎖定中之其他物資，先向 GAS 發送解鎖
+        val prevRow = currentStagedItem?.row
+        val gasUrl = prefs.gasUrl
+        if (prevRow != null && prevRow > 0 && prevRow != item.row && gasUrl.isNotBlank()) {
+            lifecycleScope.launch {
+                gasRepo.unlockItem(gasUrl, prevRow)
+                Log.d("MainActivity", "換筆自動解除前一筆 (第 $prevRow 列) 之鎖定")
+            }
+        }
+
+        // 3. 背景非同步預載照片 Base64 與鎖定列
         lifecycleScope.launch {
-            val gasUrl = prefs.gasUrl
             if (item.photos.isNotEmpty() && gasUrl.isNotBlank()) {
                 val preparedPhotos = gasRepo.preparePhotosBase64(item.photos, gasUrl)
                 currentStagedItem = item.copy(photos = preparedPhotos)

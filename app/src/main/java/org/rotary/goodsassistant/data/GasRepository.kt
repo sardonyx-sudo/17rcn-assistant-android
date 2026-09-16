@@ -81,6 +81,19 @@ class GasRepository {
         }
     }
 
+    suspend fun unlockItem(gasUrl: String, row: Int): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            var targetUrl = appendParam(gasUrl, "action", "unlockItem")
+            targetUrl = "$targetUrl&row=$row"
+            val request = Request.Builder().url(targetUrl).get().build()
+            client.newCall(request).execute().close()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.w("GasRepository", "unlockItem failed", e)
+            Result.failure(e)
+        }
+    }
+
     suspend fun markCompleted(gasUrl: String, row: Int): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             var targetUrl = appendParam(gasUrl, "action", "markPublished")
