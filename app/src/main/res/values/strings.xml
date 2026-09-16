@@ -10,7 +10,9 @@
     <string name="nav_settings">偏好設定</string>
     <string name="btn_refresh">重新整理佇列</string>
     <string name="btn_start_publish">⚡ 一鍵填入並前往刊登</string>
-    <string name="btn_reinject">⚡ 填入資料</string>
+    <string name="btn_reinject">⚡ 填入物資資料</string>
+    <string name="btn_reinject_preparing">⏳ 照片準備中...</string>
+    <string name="btn_reinject_not_target">請先進入物資刊登頁</string>
     <string name="btn_back_to_queue">返回清單</string>
     <string name="hint_gas_url">Google Apps Script (GAS) 部署網址</string>
     <string name="hint_default_address">預設自取地址 (例如：會館/服務處)</string>

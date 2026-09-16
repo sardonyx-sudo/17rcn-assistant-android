@@ -18,17 +18,17 @@
     <color name="badge_bg">#F2EBD9</color>
     <color name="badge_text">#6E4E2D</color>
 
-    <!-- 主行動按鈕 (焦糖暖褐 + 純白字，高對比度清晰引導) -->
+    <!-- 主行動按鈕 (焦糖暖褐 + 純白字) -->
     <color name="btn_cta_bg">#8C6239</color>
     <color name="btn_cta_text">#FFFFFF</color>
 
-    <!-- 次要操作按鈕 (AI重辨 - 暖砂淡褐) -->
-    <color name="btn_blue_bg">#F7EFE6</color>
-    <color name="btn_blue_text">#8C6239</color>
+    <!-- 次要操作按鈕 (AI重辨/返回 - 焦糖暖金底 + 純白字) -->
+    <color name="btn_blue_bg">#A07346</color>
+    <color name="btn_blue_text">#FFFFFF</color>
 
-    <!-- 危險操作按鈕 (刪除 - 柔和粉紅) -->
-    <color name="btn_red_bg">#FCE8E6</color>
-    <color name="btn_red_text">#D93025</color>
+    <!-- 危險操作按鈕 (刪除 - 柔和亮紅底 + 純白字) -->
+    <color name="btn_red_bg">#D93829</color>
+    <color name="btn_red_text">#FFFFFF</color>
 
     <!-- 導航列顏色 -->
     <color name="nav_active">#8C6239</color>

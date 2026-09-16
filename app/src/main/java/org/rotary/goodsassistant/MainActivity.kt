@@ -43,7 +43,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var queueAdapter: QueueAdapter
 
     private var currentStagedItem: GoodsItem? = null
-    private val goodsAddUrl = "https://www.17rcn.org/member/goods_add.php"
+    private val memberUrl = "https://www.17rcn.org/member/"
+    private val targetGoodsAddUrl = "https://www.17rcn.org/member/goods_add.php?SR_choose=1"
+    private var isItemDataReady: Boolean = false
 
     // 拍照採集狀態管理 (最多 3 張)
     private val capturedPhotos = mutableListOf<CompressedPhoto>()
@@ -322,19 +324,15 @@ class MainActivity : AppCompatActivity() {
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                if (url != null && url.contains("goods_add.php")) {
-                    if (currentStagedItem != null) {
-                        injectCurrentStagedItem()
-                    }
-                }
+                updateReinjectButtonState()
             }
         }
 
         // 注入原生通訊 Bridge
         webView.addJavascriptInterface(WebAppInterface(), "AndroidBridge")
 
-        // 初始載入刊登網址
-        webView.loadUrl(goodsAddUrl)
+        // 初始載入會員中心網址 (未登入者會自動在登入頁等待登入)
+        webView.loadUrl(memberUrl)
     }
 
     private fun loadInitialData() {
@@ -387,11 +385,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun startPublishItem(item: GoodsItem) {
         currentStagedItem = item
+        isItemDataReady = false
         binding.tvStagedItemName.text = "📦 準備刊登：${item.title ?: "物資"}"
-        Toast.makeText(this, "正在預載圖片並準備刊登...", Toast.LENGTH_SHORT).show()
+        updateReinjectButtonState()
 
+        // 1. 立刻切換至刊登分頁
+        selectTab(2)
+
+        val currentUrl = binding.webView.url
+        // 若當前不在刊登頁面，則導向刊登網址
+        if (currentUrl == null || !currentUrl.contains("goods_add.php")) {
+            binding.webView.loadUrl(targetGoodsAddUrl)
+        }
+
+        // 2. 背景非同步預載照片 Base64 與鎖定列
         lifecycleScope.launch {
-            // 背景預先下載照片 base64
             val gasUrl = prefs.gasUrl
             if (item.photos.isNotEmpty() && gasUrl.isNotBlank()) {
                 val preparedPhotos = gasRepo.preparePhotosBase64(item.photos, gasUrl)
@@ -403,19 +411,55 @@ class MainActivity : AppCompatActivity() {
                 gasRepo.lockItem(gasUrl, item.row)
             }
 
-            // 切換至 WebView 分頁 (Tab 2) 並載入刊登頁面
-            selectTab(2)
-            val currentUrl = binding.webView.url
-            if (currentUrl != null && currentUrl.contains("goods_add.php")) {
-                injectCurrentStagedItem()
-            } else {
-                binding.webView.loadUrl(goodsAddUrl)
-            }
+            isItemDataReady = true
+            updateReinjectButtonState()
+        }
+    }
+
+    private fun updateReinjectButtonState() {
+        val currentUrl = binding.webView.url ?: ""
+        // 判斷網址是否為目標刊登頁面 (包含 goods_add.php 且含有 SR_choose=1)
+        val isAtGoodsAddPage = currentUrl.contains("goods_add.php") && currentUrl.contains("SR_choose=1")
+        val item = currentStagedItem
+
+        if (item == null) {
+            binding.btnReinject.isEnabled = false
+            binding.btnReinject.alpha = 0.5f
+            binding.btnReinject.text = getString(R.string.btn_reinject)
+            return
+        }
+
+        if (!isAtGoodsAddPage) {
+            // 未在目標刊登頁面（例如在登入畫面或會員中心首頁）
+            binding.btnReinject.isEnabled = false
+            binding.btnReinject.alpha = 0.5f
+            binding.btnReinject.text = getString(R.string.btn_reinject_not_target)
+        } else if (!isItemDataReady) {
+            // 在目標頁面但照片資料仍在背景下載中
+            binding.btnReinject.isEnabled = false
+            binding.btnReinject.alpha = 0.5f
+            binding.btnReinject.text = getString(R.string.btn_reinject_preparing)
+        } else {
+            // 條件完全就緒：在刊登頁且照片已備妥！
+            binding.btnReinject.isEnabled = true
+            binding.btnReinject.alpha = 1.0f
+            binding.btnReinject.text = getString(R.string.btn_reinject)
         }
     }
 
     private fun injectCurrentStagedItem() {
         val item = currentStagedItem ?: return
+        val currentUrl = binding.webView.url ?: ""
+        if (!currentUrl.contains("goods_add.php") || !currentUrl.contains("SR_choose=1")) {
+            Toast.makeText(this, "請先登入並進入「我要提供物資」刊登畫面", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        if (!isItemDataReady) {
+            Toast.makeText(this, "物資照片下載中，請稍候...", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val defaultAddr = binding.etDefaultAddress.text.toString().trim().ifBlank { prefs.defaultAddress }
         val script = GoodsInjector.buildInjectionScript(item, defaultAddr)
         binding.webView.evaluateJavascript(script) {
