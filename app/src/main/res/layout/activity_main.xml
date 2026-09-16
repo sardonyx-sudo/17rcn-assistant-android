@@ -489,7 +489,7 @@
 
     </FrameLayout>
 
-    <!-- 底部導航欄 (Material 3 BottomNavigationView) -->
+    <!-- 底部導航欄 (BottomNavigationView) -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
@@ -497,7 +497,6 @@
         android:background="@color/card_bg"
         app:itemIconTint="@color/nav_item_color"
         app:itemTextColor="@color/nav_item_color"
-        app:itemActiveIndicatorColor="@color/nav_indicator"
         app:itemRippleColor="#158C6239"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu"
