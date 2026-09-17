@@ -8,6 +8,7 @@ import org.rotary.goodsassistant.model.GoodsItem
 
 class QueueAdapter(
     private val onPublishClick: (GoodsItem) -> Unit,
+    private val onUnlockClick: (GoodsItem) -> Unit,
     private val onReprocessClick: (GoodsItem) -> Unit,
     private val onDeleteClick: (GoodsItem) -> Unit
 ) : RecyclerView.Adapter<QueueAdapter.ViewHolder>() {
@@ -46,8 +47,27 @@ class QueueAdapter(
             binding.tvCardAddress.text = if (!item.address.isNullOrBlank()) "📍 ${item.address}" else "📍 無指定地址"
             binding.tvCardDesc.text = if (!item.description.isNullOrBlank()) item.description else "（無說明）"
 
+            val isLocked = item.status == "刊登中"
+            if (isLocked) {
+                binding.tvCardLockedBadge.visibility = android.view.View.VISIBLE
+                binding.btnPublishThis.visibility = android.view.View.GONE
+                binding.btnUnlockThis.visibility = android.view.View.VISIBLE
+            } else {
+                binding.tvCardLockedBadge.visibility = android.view.View.GONE
+                binding.btnPublishThis.visibility = android.view.View.VISIBLE
+                binding.btnUnlockThis.visibility = android.view.View.GONE
+            }
+
             binding.btnPublishThis.setOnClickListener {
                 onPublishClick(item)
+            }
+            binding.btnUnlockThis.setOnClickListener {
+                onUnlockClick(item)
+            }
+            binding.root.setOnClickListener {
+                if (isLocked) {
+                    onUnlockClick(item)
+                }
             }
             binding.btnReprocessThis.setOnClickListener {
                 onReprocessClick(item)

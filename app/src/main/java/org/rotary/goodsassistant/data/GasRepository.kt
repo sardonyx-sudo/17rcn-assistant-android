@@ -72,9 +72,25 @@ class GasRepository {
         try {
             var targetUrl = appendParam(gasUrl, "action", "lockItem")
             targetUrl = "$targetUrl&row=$row"
-            val request = Request.Builder().url(targetUrl).get().build()
-            client.newCall(request).execute().close()
-            Result.success(Unit)
+            val request = Request.Builder()
+                .url(targetUrl)
+                .get()
+                .header("Accept", "application/json")
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    return@withContext Result.failure(Exception("GAS 伺服器錯誤 HTTP ${response.code}"))
+                }
+                val bodyStr = response.body?.string() ?: ""
+                val gasResponse = gson.fromJson(bodyStr, GasResponse::class.java)
+                if (gasResponse != null && gasResponse.success) {
+                    Result.success(Unit)
+                } else {
+                    val errMsg = gasResponse?.error ?: gasResponse?.message ?: "此物資已被鎖定或狀態已變更"
+                    Result.failure(Exception(errMsg))
+                }
+            }
         } catch (e: Exception) {
             Log.w("GasRepository", "lockItem failed", e)
             Result.failure(e)
@@ -85,9 +101,25 @@ class GasRepository {
         try {
             var targetUrl = appendParam(gasUrl, "action", "unlockItem")
             targetUrl = "$targetUrl&row=$row"
-            val request = Request.Builder().url(targetUrl).get().build()
-            client.newCall(request).execute().close()
-            Result.success(Unit)
+            val request = Request.Builder()
+                .url(targetUrl)
+                .get()
+                .header("Accept", "application/json")
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    return@withContext Result.failure(Exception("GAS 伺服器錯誤 HTTP ${response.code}"))
+                }
+                val bodyStr = response.body?.string() ?: ""
+                val gasResponse = gson.fromJson(bodyStr, GasResponse::class.java)
+                if (gasResponse != null && gasResponse.success) {
+                    Result.success(Unit)
+                } else {
+                    val errMsg = gasResponse?.error ?: gasResponse?.message ?: "解除鎖定失敗"
+                    Result.failure(Exception(errMsg))
+                }
+            }
         } catch (e: Exception) {
             Log.w("GasRepository", "unlockItem failed", e)
             Result.failure(e)
@@ -98,9 +130,25 @@ class GasRepository {
         try {
             var targetUrl = appendParam(gasUrl, "action", "markPublished")
             targetUrl = "$targetUrl&row=$row"
-            val request = Request.Builder().url(targetUrl).get().build()
-            client.newCall(request).execute().close()
-            Result.success(Unit)
+            val request = Request.Builder()
+                .url(targetUrl)
+                .get()
+                .header("Accept", "application/json")
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    return@withContext Result.failure(Exception("GAS 伺服器錯誤 HTTP ${response.code}"))
+                }
+                val bodyStr = response.body?.string() ?: ""
+                val gasResponse = gson.fromJson(bodyStr, GasResponse::class.java)
+                if (gasResponse != null && gasResponse.success) {
+                    Result.success(Unit)
+                } else {
+                    val errMsg = gasResponse?.error ?: gasResponse?.message ?: "標記刊登完成失敗"
+                    Result.failure(Exception(errMsg))
+                }
+            }
         } catch (e: Exception) {
             Log.w("GasRepository", "markCompleted failed", e)
             Result.failure(e)

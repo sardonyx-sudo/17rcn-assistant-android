@@ -16,7 +16,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- 頂部分類與數量標籤 -->
+        <!-- 頂部分類與數量標籤 + 刊登中鎖定標記 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -43,6 +43,26 @@
                 android:text="數量：1"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
+
+            <!-- 彈性撐開 -->
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <!-- 刊登中鎖定徽章 -->
+            <TextView
+                android:id="@+id/tvCardLockedBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/badge_status_locked"
+                android:textColor="@color/badge_locked_text"
+                android:background="@drawable/badge_locked_bg"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="3dp"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
         </LinearLayout>
 
         <!-- 物資品名標題 -->
@@ -79,7 +99,7 @@
             android:lineSpacingExtra="2dp"
             android:layout_marginTop="6dp" />
 
-        <!-- 操作按鈕列 (焦糖刊登主按鈕 + 重辨 + 刪除) -->
+        <!-- 操作按鈕列 (焦糖刊登主按鈕 / 琥珀解鎖按鈕 + 重辨 + 刪除) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -100,6 +120,22 @@
                 android:paddingStart="6dp"
                 android:paddingEnd="6dp"
                 android:includeFontPadding="false"
+                style="?android:attr/borderlessButtonStyle" />
+
+            <Button
+                android:id="@+id/btnUnlockThis"
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:layout_weight="2.2"
+                android:text="@string/btn_unlock_item"
+                android:textColor="@color/btn_amber_text"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:background="@drawable/btn_pill_amber"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:includeFontPadding="false"
+                android:visibility="gone"
                 style="?android:attr/borderlessButtonStyle" />
 
             <Button

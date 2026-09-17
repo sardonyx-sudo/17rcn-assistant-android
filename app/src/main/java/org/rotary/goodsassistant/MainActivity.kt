@@ -100,6 +100,7 @@ class MainActivity : AppCompatActivity() {
         // 1. RecyclerView 待刊佇列
         queueAdapter = QueueAdapter(
             onPublishClick = { item -> startPublishItem(item) },
+            onUnlockClick = { item -> handleUnlockItem(item) },
             onReprocessClick = { item -> reprocessItem(item) },
             onDeleteClick = { item -> confirmDeleteItem(item) }
         )
@@ -384,13 +385,54 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleUnlockItem(item: GoodsItem) {
+        val gasUrl = prefs.gasUrl
+        if (gasUrl.isBlank()) {
+            Toast.makeText(this, "⚠️ 請先至偏好設定輸入 GAS 部署網址", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_locked_title)
+            .setMessage(getString(R.string.dialog_locked_message, item.title?.ifBlank { "此物資" } ?: "此物資"))
+            .setPositiveButton(R.string.dialog_locked_btn_unlock) { _, _ ->
+                unlockItemAndRefresh(item)
+            }
+            .setNegativeButton(R.string.dialog_cancel, null)
+            .show()
+    }
+
+    private fun unlockItemAndRefresh(item: GoodsItem) {
+        val gasUrl = prefs.gasUrl
+        if (gasUrl.isBlank()) return
+
+        lifecycleScope.launch {
+            binding.queueProgressBar.visibility = View.VISIBLE
+            val result = gasRepo.unlockItem(gasUrl, item.row)
+            binding.queueProgressBar.visibility = View.GONE
+            result.onSuccess {
+                Toast.makeText(this@MainActivity, getString(R.string.toast_unlock_success, item.title?.ifBlank { "物資" } ?: "物資"), Toast.LENGTH_SHORT).show()
+                refreshQueue()
+            }.onFailure { err ->
+                Toast.makeText(this@MainActivity, "解除鎖定失敗：${err.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
     private fun startPublishItem(item: GoodsItem) {
+        // 1. 防護：若物資目前已被鎖定為「刊登中」，阻止直接刊登並彈出解鎖對話框
+        if (item.status == "刊登中") {
+            handleUnlockItem(item)
+            return
+        }
+
+        val prevRow = currentStagedItem?.row
         currentStagedItem = item
         isItemDataReady = false
         binding.tvStagedItemName.text = "📦 準備刊登：${item.title ?: "物資"}"
         updateReinjectButtonState()
 
-        // 1. 立刻切換至刊登分頁
+        // 2. 立刻切換至刊登分頁
         selectTab(2)
 
         val currentUrl = binding.webView.url
@@ -399,9 +441,8 @@ class MainActivity : AppCompatActivity() {
             binding.webView.loadUrl(targetGoodsAddUrl)
         }
 
-        // 2. 換筆自動解鎖：若先前已有鎖定中之其他物資，先向 GAS 發送解鎖
-        val prevRow = currentStagedItem?.row
         val gasUrl = prefs.gasUrl
+        // 3. 換筆自動解鎖：若先前已有鎖定中之其他物資，先向 GAS 發送解鎖
         if (prevRow != null && prevRow > 0 && prevRow != item.row && gasUrl.isNotBlank()) {
             lifecycleScope.launch {
                 gasRepo.unlockItem(gasUrl, prevRow)
@@ -409,16 +450,26 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // 3. 背景非同步預載照片 Base64 與鎖定列
+        // 4. 背景非同步預載照片 Base64 與向後端鎖定該列
         lifecycleScope.launch {
+            // 向 GAS 鎖定該列
+            if (item.row > 0 && gasUrl.isNotBlank()) {
+                val lockResult = gasRepo.lockItem(gasUrl, item.row)
+                if (lockResult.isFailure) {
+                    val errMsg = lockResult.exceptionOrNull()?.message ?: "此物資已被其他裝置鎖定或狀態已變更"
+                    Toast.makeText(this@MainActivity, "⚠️ 無法刊登：$errMsg", Toast.LENGTH_LONG).show()
+                    currentStagedItem = null
+                    isItemDataReady = false
+                    updateReinjectButtonState()
+                    selectTab(1) // 退回佇列分頁
+                    refreshQueue()
+                    return@launch
+                }
+            }
+
             if (item.photos.isNotEmpty() && gasUrl.isNotBlank()) {
                 val preparedPhotos = gasRepo.preparePhotosBase64(item.photos, gasUrl)
                 currentStagedItem = item.copy(photos = preparedPhotos)
-            }
-
-            // 鎖定該列
-            if (item.row > 0 && gasUrl.isNotBlank()) {
-                gasRepo.lockItem(gasUrl, item.row)
             }
 
             isItemDataReady = true

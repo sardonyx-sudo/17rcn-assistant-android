@@ -34,4 +34,10 @@
     <color name="nav_active">#8C6239</color>
     <color name="nav_inactive">#8A7F75</color>
     <color name="nav_indicator">#F2EBD9</color>
+
+    <!-- 鎖定狀態標籤與解鎖按鈕 (琥珀金) -->
+    <color name="badge_locked_bg">#FEF3C7</color>
+    <color name="badge_locked_text">#92400E</color>
+    <color name="btn_amber_bg">#D97706</color>
+    <color name="btn_amber_text">#FFFFFF</color>
 </resources>

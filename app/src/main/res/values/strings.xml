@@ -35,4 +35,13 @@
     <string name="label_capture_note">📝 物資現況 / 備註補充 (選填)</string>
     <string name="hint_capture_note">例如：外觀良好功能正常，附電源線，僅表面有微細刮痕...</string>
     <string name="btn_upload_and_recognize">🚀 上傳至雲端並啟動 AI 辨識</string>
+
+    <!-- 鎖定狀態與防護文字 -->
+    <string name="badge_status_locked">🔒 刊登中</string>
+    <string name="btn_unlock_item">🔓 解鎖</string>
+    <string name="dialog_locked_title">⚠️ 物資已被鎖定</string>
+    <string name="dialog_locked_message">物資【%1$s】目前處於「刊登中」狀態，正由其他裝置處理中。\n\n若該次刊登已中斷或確認未刊登，可點擊「解除鎖定」將其恢復為「待刊登」。</string>
+    <string name="dialog_locked_btn_unlock">🔓 解除鎖定</string>
+    <string name="toast_locked_cannot_publish">⚠️ 該物資正由其他裝置刊登中，無法直接刊登！請先解鎖。</string>
+    <string name="toast_unlock_success">✅ 已成功解除【%1$s】之鎖定！</string>
 </resources>
