@@ -51,14 +51,12 @@ class QueueAdapter(
 
             val isLocked = item.status?.trim()?.contains("刊登中") == true
             if (isLocked) {
-                binding.layoutLockedBanner.visibility = android.view.View.VISIBLE
                 binding.tvCardLockedBadge.visibility = android.view.View.VISIBLE
                 binding.btnPublishThis.visibility = android.view.View.GONE
                 binding.btnUnlockThis.visibility = android.view.View.VISIBLE
                 binding.cardGoods.strokeColor = ContextCompat.getColor(binding.root.context, R.color.badge_locked_text)
                 binding.cardGoods.strokeWidth = (2 * binding.root.resources.displayMetrics.density).toInt()
             } else {
-                binding.layoutLockedBanner.visibility = android.view.View.GONE
                 binding.tvCardLockedBadge.visibility = android.view.View.GONE
                 binding.btnPublishThis.visibility = android.view.View.VISIBLE
                 binding.btnUnlockThis.visibility = android.view.View.GONE
