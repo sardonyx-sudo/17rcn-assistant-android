@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardGoods"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="14dp"
@@ -16,45 +17,41 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- 頂部分類與數量標籤 + 刊登中鎖定標記 -->
+        <!-- 刊登中醒目警示橫幅 (滿版獨立顯示，絕不會被推擠裁切) -->
         <LinearLayout
+            android:id="@+id/layoutLockedBanner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:background="@drawable/badge_locked_bg"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone">
 
             <TextView
-                android:id="@+id/tvCardCategory"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="家電生活"
-                android:textColor="@color/badge_text"
-                android:background="@drawable/badge_bg"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="4dp"
+                android:text="🔒 此物資目前正在由其他裝置刊登中（已鎖定）"
+                android:textColor="@color/badge_locked_text"
                 android:textSize="12sp"
                 android:textStyle="bold" />
+        </LinearLayout>
 
-            <TextView
-                android:id="@+id/tvCardQuantity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="數量：1"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
+        <!-- 頂部分類與數量標籤 + 刊登中鎖定標記 (使用 RelativeLayout 固定右側，確保右上徽章不被擠出螢幕) -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-            <!-- 彈性撐開 -->
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
-
-            <!-- 刊登中鎖定徽章 -->
+            <!-- 右側鎖定徽章 (固定最右側，優先排版) -->
             <TextView
                 android:id="@+id/tvCardLockedBadge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="8dp"
                 android:text="@string/badge_status_locked"
                 android:textColor="@color/badge_locked_text"
                 android:background="@drawable/badge_locked_bg"
@@ -63,7 +60,42 @@
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:visibility="gone" />
-        </LinearLayout>
+
+            <!-- 左側分類與數量 (受限於右側徽章，自動加省略號) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@id/tvCardLockedBadge"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvCardCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="家電生活"
+                    android:textColor="@color/badge_text"
+                    android:background="@drawable/badge_bg"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/tvCardQuantity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="數量：1"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:maxLines="1" />
+            </LinearLayout>
+        </RelativeLayout>
 
         <!-- 物資品名標題 -->
         <TextView

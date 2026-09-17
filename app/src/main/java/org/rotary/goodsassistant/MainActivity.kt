@@ -421,7 +421,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startPublishItem(item: GoodsItem) {
         // 1. 防護：若物資目前已被鎖定為「刊登中」，阻止直接刊登並彈出解鎖對話框
-        if (item.status == "刊登中") {
+        if (item.status?.trim()?.contains("刊登中") == true) {
             handleUnlockItem(item)
             return
         }
@@ -561,7 +561,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        if (item.status == "刊登中") {
+        if (item.status?.trim()?.contains("刊登中") == true) {
             Toast.makeText(this, "⚠️ 此物資目前正在刊登中，無法刪除！", Toast.LENGTH_LONG).show()
             return
         }
