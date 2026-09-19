@@ -50,6 +50,8 @@ data class GasData(
 data class GasResponse(
     @SerializedName("success") val success: Boolean = false,
     @SerializedName("items") val items: List<GoodsItem>? = null,
+    @SerializedName("processingItems") val processingItems: List<GoodsItem>? = null,
+    @SerializedName("processingCount") val processingCount: Int = 0,
     @SerializedName("data") val data: GasData? = null,
     @SerializedName("error") val error: String? = null,
     @SerializedName("message") val message: String? = null,

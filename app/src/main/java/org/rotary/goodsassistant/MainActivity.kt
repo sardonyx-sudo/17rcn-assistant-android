@@ -25,6 +25,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.rotary.goodsassistant.data.GasRepository
 import org.rotary.goodsassistant.data.ImageCacheManager
@@ -51,6 +53,12 @@ class MainActivity : AppCompatActivity() {
     private val memberUrl = "https://www.17rcn.org/member/"
     private val targetGoodsAddUrl = "https://www.17rcn.org/member/goods_add.php?SR_choose=1"
     private var isItemDataReady: Boolean = false
+
+    // GAS 請求防疊鎖、手動重整冷卻與 AI 辨識中自動轉正
+    private var isRefreshingQueue = false
+    private var lastManualRefreshTime = 0L
+    private var processingAutoRefreshCount = 0
+    private var processingJob: Job? = null
 
     // 拍照採集狀態管理 (最多 3 張)
     private val capturedPhotos = mutableListOf<CompressedPhoto>()
@@ -305,7 +313,7 @@ class MainActivity : AppCompatActivity() {
                 binding.etCaptureNote.setText("")
                 // 切換至物資佇列分頁並自動刷新
                 selectTab(1)
-                refreshQueue()
+                refreshQueue(silent = false, force = true)
             }.onFailure { err ->
                 AlertDialog.Builder(this@MainActivity)
                     .setTitle("❌ 上傳失敗")
@@ -405,32 +413,69 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        // 1. In-Flight 飛航鎖：若前一次網路請求仍在進行中，攔截重複請求避免灌爆 GAS
+        if (isRefreshingQueue) {
+            Log.d("MainActivity", "refreshQueue: 已有進行中的請求，跳過本次重整。")
+            return
+        }
+
+        // 2. 手動重整 5 秒冷卻防護：非強制且為手動操作時，限制 5 秒內不可重複點擊
+        val now = System.currentTimeMillis()
+        if (!silent && !force && (now - lastManualRefreshTime < 5000L)) {
+            Toast.makeText(this, "請稍候 5 秒再重新整理，避免連線過於頻繁", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (!silent) {
+            lastManualRefreshTime = now
+        }
+
+        isRefreshingQueue = true
         if (!silent) {
             binding.queueProgressBar.visibility = View.VISIBLE
             binding.tvQueueStatus.visibility = View.GONE
         }
 
         lifecycleScope.launch {
-            val result = gasRepo.getQueue(gasUrl)
-            if (!silent) {
-                binding.queueProgressBar.visibility = View.GONE
-            }
-            result.onSuccess { items ->
-                // 寫入本地快取
-                queueCache.saveQueue(items)
-                if (items.isEmpty()) {
-                    binding.tvQueueStatus.text = getString(R.string.status_empty)
-                    binding.tvQueueStatus.visibility = View.VISIBLE
-                    queueAdapter.submitList(emptyList())
-                } else {
-                    binding.tvQueueStatus.visibility = View.GONE
-                    queueAdapter.submitList(items)
-                }
-            }.onFailure { err ->
+            try {
+                val result = gasRepo.getQueue(gasUrl)
                 if (!silent) {
-                    binding.tvQueueStatus.text = "❌ 連線錯誤：${err.message}"
-                    binding.tvQueueStatus.visibility = View.VISIBLE
+                    binding.queueProgressBar.visibility = View.GONE
                 }
+                result.onSuccess { items ->
+                    // 寫入本地快取
+                    queueCache.saveQueue(items)
+                    if (items.isEmpty()) {
+                        binding.tvQueueStatus.text = getString(R.string.status_empty)
+                        binding.tvQueueStatus.visibility = View.VISIBLE
+                        queueAdapter.submitList(emptyList())
+                    } else {
+                        binding.tvQueueStatus.visibility = View.GONE
+                        queueAdapter.submitList(items)
+                    }
+
+                    // 3. AI 辨識中項目自動短輪詢（間隔 15 秒，上限 2 次）
+                    val hasProcessing = items.any { it.status?.trim()?.contains("AI辨識中") == true }
+                    if (hasProcessing) {
+                        if (processingAutoRefreshCount < 2) {
+                            processingAutoRefreshCount++
+                            processingJob?.cancel()
+                            processingJob = lifecycleScope.launch {
+                                delay(15000L) // 15 秒後背景靜默查詢轉正
+                                refreshQueue(silent = true, force = true)
+                            }
+                        }
+                    } else {
+                        processingAutoRefreshCount = 0
+                        processingJob?.cancel()
+                    }
+                }.onFailure { err ->
+                    if (!silent) {
+                        binding.tvQueueStatus.text = "❌ 連線錯誤：${err.message}"
+                        binding.tvQueueStatus.visibility = View.VISIBLE
+                    }
+                }
+            } finally {
+                isRefreshingQueue = false
             }
         }
     }
@@ -463,7 +508,7 @@ class MainActivity : AppCompatActivity() {
             result.onSuccess {
                 Toast.makeText(this@MainActivity, getString(R.string.toast_unlock_success, item.title?.ifBlank { "物資" } ?: "物資"), Toast.LENGTH_SHORT).show()
                 queueCache.updateItemStatus(item.row, "待刊登")
-                refreshQueue()
+                refreshQueue(force = true)
             }.onFailure { err ->
                 Toast.makeText(this@MainActivity, "解除鎖定失敗：${err.message}", Toast.LENGTH_LONG).show()
             }
@@ -471,6 +516,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startPublishItem(item: GoodsItem) {
+        // 0. 防呆攔截：若物資處於「AI辨識中」，禁止觸發刊登並提示
+        if (item.status?.trim()?.contains("AI辨識中") == true) {
+            Toast.makeText(this, getString(R.string.toast_processing_cannot_publish), Toast.LENGTH_SHORT).show()
+            return
+        }
+
         // 1. 防護：若物資目前已被鎖定為「刊登中」，阻止直接刊登並彈出解鎖對話框
         if (item.status?.trim()?.contains("刊登中") == true) {
             handleUnlockItem(item)

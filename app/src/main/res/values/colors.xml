@@ -40,4 +40,8 @@
     <color name="badge_locked_text">#92400E</color>
     <color name="btn_amber_bg">#D97706</color>
     <color name="btn_amber_text">#FFFFFF</color>
+
+    <!-- AI辨識中狀態標籤 (天藍底 + 深藍字) -->
+    <color name="badge_processing_bg">#E0F2FE</color>
+    <color name="badge_processing_text">#0284C7</color>
 </resources>

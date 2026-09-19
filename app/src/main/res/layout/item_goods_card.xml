@@ -22,28 +22,48 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <!-- 右側鎖定徽章 (固定最右側，優先排版) -->
-            <TextView
-                android:id="@+id/tvCardLockedBadge"
+            <!-- 右側徽章容器 (固定最右側，優先排版，確保不被擠出螢幕) -->
+            <LinearLayout
+                android:id="@+id/layoutBadges"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="8dp"
-                android:text="@string/badge_status_locked"
-                android:textColor="@color/badge_locked_text"
-                android:background="@drawable/badge_locked_bg"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="3dp"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:visibility="gone" />
+                android:orientation="horizontal">
 
-            <!-- 左側分類與數量 (受限於右側徽章，自動加省略號) -->
+                <TextView
+                    android:id="@+id/tvCardProcessingBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/badge_status_processing"
+                    android:textColor="@color/badge_processing_text"
+                    android:background="@drawable/badge_processing_bg"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/tvCardLockedBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/badge_status_locked"
+                    android:textColor="@color/badge_locked_text"
+                    android:background="@drawable/badge_locked_bg"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- 左側分類與數量 (受限於右側徽章容器，自動加省略號) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toStartOf="@id/tvCardLockedBadge"
+                android:layout_toStartOf="@id/layoutBadges"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:gravity="center_vertical"

@@ -39,6 +39,8 @@
     <!-- 鎖定狀態與防護文字 -->
     <string name="badge_status_locked">🔒 刊登中</string>
     <string name="btn_unlock_item">🔓 解鎖</string>
+    <string name="badge_status_processing">🤖 AI 辨識中</string>
+    <string name="toast_processing_cannot_publish">⏳ AI 正在深度分析此物資，請稍候約 10~15 秒完成辨識後再行刊登！</string>
     <string name="dialog_locked_title">⚠️ 物資已被鎖定</string>
     <string name="dialog_locked_message">物資【%1$s】目前處於「刊登中」狀態，正由其他裝置處理中。\n\n若該次刊登已中斷或確認未刊登，可點擊「解除鎖定」將其恢復為「待刊登」。</string>
     <string name="dialog_locked_btn_unlock">🔓 解除鎖定</string>

@@ -53,12 +53,21 @@ class GasRepository {
                 val gasResponse = gson.fromJson(bodyStr, GasResponse::class.java)
                 val items = gasResponse.items ?: gasResponse.data?.items
                 if (gasResponse.success && items != null) {
-                    // 篩選待刊登或刊登中的項目 (支援前後空白容錯)
+                    val resultList = mutableListOf<GoodsItem>()
+                    // 1. 若有正在 AI 辨識中的項目，置頂顯示於佇列最上方
+                    val processing = gasResponse.processingItems?.filter { 
+                        it.status?.trim()?.contains("AI辨識中") == true 
+                    } ?: emptyList()
+                    resultList.addAll(processing)
+
+                    // 2. 篩選待刊登或刊登中的項目 (支援前後空白容錯)
                     val pending = items.filter { 
                         val s = it.status?.trim() ?: ""
                         s.contains("待刊登") || s.contains("刊登中") 
                     }
-                    Result.success(pending)
+                    resultList.addAll(pending)
+
+                    Result.success(resultList)
                 } else {
                     val errMsg = gasResponse.error ?: gasResponse.message ?: "無法獲取佇列資料"
                     Result.failure(Exception(errMsg))
