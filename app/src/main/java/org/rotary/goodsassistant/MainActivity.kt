@@ -27,7 +27,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
 import org.rotary.goodsassistant.data.GasRepository
+import org.rotary.goodsassistant.data.ImageCacheManager
 import org.rotary.goodsassistant.data.PreferencesManager
+import org.rotary.goodsassistant.data.QueueCacheManager
 import org.rotary.goodsassistant.databinding.ActivityMainBinding
 import org.rotary.goodsassistant.model.GoodsItem
 import org.rotary.goodsassistant.ui.QueueAdapter
@@ -40,6 +42,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var prefs: PreferencesManager
+    private lateinit var queueCache: QueueCacheManager
+    private lateinit var imageCache: ImageCacheManager
     private val gasRepo = GasRepository()
     private lateinit var queueAdapter: QueueAdapter
 
@@ -90,6 +94,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         prefs = PreferencesManager(this)
+        queueCache = QueueCacheManager(this)
+        imageCache = ImageCacheManager(this)
         setupViews()
         setupCaptureTab()
         setupWebView()
@@ -116,6 +122,17 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.nav_queue -> {
                     switchTab(1)
+                    val cached = queueCache.loadQueue()
+                    if (cached != null) {
+                        val elapsed = System.currentTimeMillis() - cached.second
+                        if (elapsed >= QueueCacheManager.CACHE_TTL_MS) {
+                            refreshQueue(silent = false)
+                        } else {
+                            refreshQueue(silent = true)
+                        }
+                    } else {
+                        refreshQueue(silent = false)
+                    }
                     true
                 }
                 R.id.nav_browser -> {
@@ -132,7 +149,7 @@ class MainActivity : AppCompatActivity() {
 
         // 3. 頂部按鈕監聽
         binding.btnHeaderRefresh.setOnClickListener {
-            refreshQueue()
+            refreshQueue(silent = false, force = true)
         }
 
         binding.btnBackQueue.setOnClickListener {
@@ -347,29 +364,60 @@ class MainActivity : AppCompatActivity() {
             binding.etCaptureAddress.setText(defaultAddr)
         }
 
-        if (prefs.gasUrl.isNotBlank()) {
-            refreshQueue()
+        // 1. 優先由本地快取秒開展示
+        val cachedQueue = queueCache.loadQueue()
+        if (cachedQueue != null && cachedQueue.first.isNotEmpty()) {
+            val items = cachedQueue.first
+            val timestamp = cachedQueue.second
+            binding.tvQueueStatus.visibility = View.GONE
+            queueAdapter.submitList(items)
+
+            val elapsed = System.currentTimeMillis() - timestamp
+            if (elapsed < QueueCacheManager.CACHE_TTL_MS) {
+                // 5 分鐘快取有效期內：背景靜默同步（不彈轉圈動畫）
+                if (prefs.gasUrl.isNotBlank()) {
+                    refreshQueue(silent = true)
+                }
+            } else {
+                // 已過期：正常網路同步
+                if (prefs.gasUrl.isNotBlank()) {
+                    refreshQueue(silent = false)
+                }
+            }
         } else {
-            binding.tvQueueStatus.text = "請先至「偏好設定」分頁填入 Google Apps Script 網址"
-            binding.tvQueueStatus.visibility = View.VISIBLE
+            // 無快取：正常網路連線
+            if (prefs.gasUrl.isNotBlank()) {
+                refreshQueue(silent = false)
+            } else {
+                binding.tvQueueStatus.text = "請先至「偏好設定」分頁填入 Google Apps Script 網址"
+                binding.tvQueueStatus.visibility = View.VISIBLE
+            }
         }
     }
 
-    private fun refreshQueue() {
+    private fun refreshQueue(silent: Boolean = false, force: Boolean = false) {
         val gasUrl = prefs.gasUrl
         if (gasUrl.isBlank()) {
-            binding.tvQueueStatus.text = "⚠️ 請先至「偏好設定」輸入 Google Apps Script 部署網址"
-            binding.tvQueueStatus.visibility = View.VISIBLE
+            if (!silent) {
+                binding.tvQueueStatus.text = "⚠️ 請先至「偏好設定」輸入 Google Apps Script 部署網址"
+                binding.tvQueueStatus.visibility = View.VISIBLE
+            }
             return
         }
 
-        binding.queueProgressBar.visibility = View.VISIBLE
-        binding.tvQueueStatus.visibility = View.GONE
+        if (!silent) {
+            binding.queueProgressBar.visibility = View.VISIBLE
+            binding.tvQueueStatus.visibility = View.GONE
+        }
 
         lifecycleScope.launch {
             val result = gasRepo.getQueue(gasUrl)
-            binding.queueProgressBar.visibility = View.GONE
+            if (!silent) {
+                binding.queueProgressBar.visibility = View.GONE
+            }
             result.onSuccess { items ->
+                // 寫入本地快取
+                queueCache.saveQueue(items)
                 if (items.isEmpty()) {
                     binding.tvQueueStatus.text = getString(R.string.status_empty)
                     binding.tvQueueStatus.visibility = View.VISIBLE
@@ -379,8 +427,10 @@ class MainActivity : AppCompatActivity() {
                     queueAdapter.submitList(items)
                 }
             }.onFailure { err ->
-                binding.tvQueueStatus.text = "❌ 連線錯誤：${err.message}"
-                binding.tvQueueStatus.visibility = View.VISIBLE
+                if (!silent) {
+                    binding.tvQueueStatus.text = "❌ 連線錯誤：${err.message}"
+                    binding.tvQueueStatus.visibility = View.VISIBLE
+                }
             }
         }
     }
@@ -412,6 +462,7 @@ class MainActivity : AppCompatActivity() {
             binding.queueProgressBar.visibility = View.GONE
             result.onSuccess {
                 Toast.makeText(this@MainActivity, getString(R.string.toast_unlock_success, item.title?.ifBlank { "物資" } ?: "物資"), Toast.LENGTH_SHORT).show()
+                queueCache.updateItemStatus(item.row, "待刊登")
                 refreshQueue()
             }.onFailure { err ->
                 Toast.makeText(this@MainActivity, "解除鎖定失敗：${err.message}", Toast.LENGTH_LONG).show()
@@ -446,6 +497,7 @@ class MainActivity : AppCompatActivity() {
         if (prevRow != null && prevRow > 0 && prevRow != item.row && gasUrl.isNotBlank()) {
             lifecycleScope.launch {
                 gasRepo.unlockItem(gasUrl, prevRow)
+                queueCache.updateItemStatus(prevRow, "待刊登")
                 Log.d("MainActivity", "換筆自動解除前一筆 (第 $prevRow 列) 之鎖定")
             }
         }
@@ -464,11 +516,14 @@ class MainActivity : AppCompatActivity() {
                     selectTab(1) // 退回佇列分頁
                     refreshQueue()
                     return@launch
+                } else {
+                    // 鎖定成功，即時回寫本地快取狀態
+                    queueCache.updateItemStatus(item.row, "刊登中")
                 }
             }
 
             if (item.photos.isNotEmpty() && gasUrl.isNotBlank()) {
-                val preparedPhotos = gasRepo.preparePhotosBase64(item.photos, gasUrl)
+                val preparedPhotos = gasRepo.preparePhotosBase64(item.photos, gasUrl, imageCache)
                 currentStagedItem = item.copy(photos = preparedPhotos)
             }
 
@@ -589,6 +644,7 @@ class MainActivity : AppCompatActivity() {
             binding.queueProgressBar.visibility = View.GONE
             result.onSuccess {
                 Toast.makeText(this@MainActivity, "✅ 第 ${item.row} 列物資已成功刪除！", Toast.LENGTH_SHORT).show()
+                queueCache.removeItem(item.row)
                 refreshQueue()
             }.onFailure { err ->
                 AlertDialog.Builder(this@MainActivity)
@@ -630,6 +686,7 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 val completedItem = currentStagedItem
                 if (completedItem != null && completedItem.row > 0) {
+                    queueCache.removeItem(completedItem.row)
                     val gasUrl = prefs.gasUrl
                     if (gasUrl.isNotBlank()) {
                         lifecycleScope.launch {

@@ -218,10 +218,25 @@ class GasRepository {
         }
     }
 
-    suspend fun preparePhotosBase64(photos: List<PhotoItem>, gasUrl: String): List<PhotoItem> = withContext(Dispatchers.IO) {
+    suspend fun preparePhotosBase64(
+        photos: List<PhotoItem>,
+        gasUrl: String,
+        imageCacheManager: ImageCacheManager? = null
+    ): List<PhotoItem> = withContext(Dispatchers.IO) {
         photos.take(3).map { photo ->
             var loaded = false
             val fileId = photo.fileId ?: photo.id
+            val cacheKey = fileId ?: photo.downloadUrl ?: photo.originalUrl ?: ""
+
+            // 策略 0：優先檢查雙層圖片快取（L1 記憶體 / L2 磁碟）
+            if (cacheKey.isNotBlank() && imageCacheManager != null) {
+                val cached = imageCacheManager.get(cacheKey)
+                if (cached != null) {
+                    photo.base64Data = cached.base64Data
+                    photo.mimeType = cached.mimeType
+                    return@map photo
+                }
+            }
 
             // 策略 1：優先透過 GAS 代理下載（DriveApp 後端轉 Base64，完全避開 Google Drive 登入/Cookie 阻擋）
             if (!fileId.isNullOrBlank() && gasUrl.isNotBlank()) {
@@ -237,6 +252,9 @@ class GasRepository {
                                 photo.base64Data = imgResp.base64
                                 photo.mimeType = imgResp.mimeType ?: "image/jpeg"
                                 loaded = true
+                                if (cacheKey.isNotBlank() && imageCacheManager != null) {
+                                    imageCacheManager.put(cacheKey, photo.base64Data!!, photo.mimeType ?: "image/jpeg")
+                                }
                             }
                         }
                     }
@@ -258,6 +276,9 @@ class GasRepository {
                                     photo.base64Data = Base64.encodeToString(bytes, Base64.NO_WRAP)
                                     photo.mimeType = resp.header("Content-Type", "image/jpeg")
                                     loaded = true
+                                    if (cacheKey.isNotBlank() && imageCacheManager != null) {
+                                        imageCacheManager.put(cacheKey, photo.base64Data!!, photo.mimeType ?: "image/jpeg")
+                                    }
                                 }
                             }
                         }
