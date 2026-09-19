@@ -204,8 +204,8 @@ object GoodsInjector {
                     trigger(dateRadio, 'change');
                 }
 
-                // 7. 建議索取方式：預設自送 (SR_howTake[] = '2')
-                const howRadio = document.querySelector('input[name="SR_howTake[]"][value="2"]');
+                // 7. 建議索取方式：預設自取 (SR_howTake[] = '1')
+                const howRadio = document.querySelector('input[name="SR_howTake[]"][value="1"]');
                 if (howRadio) {
                     howRadio.checked = true;
                     trigger(howRadio, 'change');
