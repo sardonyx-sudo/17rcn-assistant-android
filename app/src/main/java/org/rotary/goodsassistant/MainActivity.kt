@@ -413,8 +413,8 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // 1. In-Flight 飛航鎖：若前一次網路請求仍在進行中，攔截重複請求避免灌爆 GAS
-        if (isRefreshingQueue) {
+        // 1. In-Flight 飛航鎖：若前一次網路請求仍在進行中，攔截重複請求避免灌爆 GAS（若為 force 強制更新則放行）
+        if (isRefreshingQueue && !force) {
             Log.d("MainActivity", "refreshQueue: 已有進行中的請求，跳過本次重整。")
             return
         }
@@ -454,7 +454,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     // 3. AI 辨識中項目自動短輪詢（間隔 15 秒，上限 2 次）
-                    val hasProcessing = items.any { it.status?.trim()?.contains("AI辨識中") == true }
+                    val hasProcessing = items.any { it.status?.replace("\\s+".toRegex(), "")?.contains("辨識中") == true }
                     if (hasProcessing) {
                         if (processingAutoRefreshCount < 2) {
                             processingAutoRefreshCount++
@@ -517,13 +517,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun startPublishItem(item: GoodsItem) {
         // 0. 防呆攔截：若物資處於「AI辨識中」，禁止觸發刊登並提示
-        if (item.status?.trim()?.contains("AI辨識中") == true) {
+        if (item.status?.replace("\\s+".toRegex(), "")?.contains("辨識中") == true) {
             Toast.makeText(this, getString(R.string.toast_processing_cannot_publish), Toast.LENGTH_SHORT).show()
             return
         }
 
         // 1. 防護：若物資目前已被鎖定為「刊登中」，阻止直接刊登並彈出解鎖對話框
-        if (item.status?.trim()?.contains("刊登中") == true) {
+        if (item.status?.replace("\\s+".toRegex(), "")?.contains("刊登中") == true) {
             handleUnlockItem(item)
             return
         }

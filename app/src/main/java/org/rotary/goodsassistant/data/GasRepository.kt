@@ -55,14 +55,15 @@ class GasRepository {
                 if (gasResponse.success && items != null) {
                     val resultList = mutableListOf<GoodsItem>()
                     // 1. 若有正在 AI 辨識中的項目，置頂顯示於佇列最上方
-                    val processing = gasResponse.processingItems?.filter { 
-                        it.status?.trim()?.contains("AI辨識中") == true 
+                    val processing = gasResponse.processingItems?.filter { item ->
+                        val s = item.status?.replace("\\s+".toRegex(), "") ?: ""
+                        s.contains("辨識中")
                     } ?: emptyList()
                     resultList.addAll(processing)
 
                     // 2. 篩選待刊登或刊登中的項目 (支援前後空白容錯)
-                    val pending = items.filter { 
-                        val s = it.status?.trim() ?: ""
+                    val pending = items.filter { item ->
+                        val s = item.status?.replace("\\s+".toRegex(), "") ?: ""
                         s.contains("待刊登") || s.contains("刊登中") 
                     }
                     resultList.addAll(pending)

@@ -49,8 +49,8 @@ class QueueAdapter(
             binding.tvCardAddress.text = if (!item.address.isNullOrBlank()) "📍 ${item.address}" else "📍 無指定地址"
             binding.tvCardDesc.text = if (!item.description.isNullOrBlank()) item.description else "（無說明）"
 
-            val isProcessing = item.status?.trim()?.contains("AI辨識中") == true
-            val isLocked = item.status?.trim()?.contains("刊登中") == true
+            val isProcessing = item.status?.replace("\\s+".toRegex(), "")?.contains("辨識中") == true
+            val isLocked = item.status?.replace("\\s+".toRegex(), "")?.contains("刊登中") == true
 
             if (isProcessing) {
                 binding.tvCardProcessingBadge.visibility = android.view.View.VISIBLE
