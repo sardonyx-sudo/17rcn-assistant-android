@@ -446,6 +446,27 @@
                     android:textColor="@color/text_primary"
                     android:background="@drawable/edittext_border" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="志工姓名 / 暱稱 (可選填)"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:layout_marginTop="16dp" />
+
+                <EditText
+                    android:id="@+id/etUploaderName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="例如：王小明（留白則顯示未具名）"
+                    android:inputType="textPersonName"
+                    android:textSize="14sp"
+                    android:layout_marginTop="6dp"
+                    android:padding="12dp"
+                    android:textColor="@color/text_primary"
+                    android:background="@drawable/edittext_border" />
+
                 <Button
                     android:id="@+id/btnSaveSettings"
                     android:layout_width="match_parent"

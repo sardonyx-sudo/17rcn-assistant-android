@@ -60,6 +60,10 @@ class MainActivity : AppCompatActivity() {
     private var processingAutoRefreshCount = 0
     private var processingJob: Job? = null
 
+    // 重新辨識單工鎖與 10 秒冷卻
+    private var isReprocessing = false
+    private var lastReprocessTime = 0L
+
     // 拍照採集狀態管理 (最多 3 張)
     private val capturedPhotos = mutableListOf<CompressedPhoto>()
     private var tempCameraUri: Uri? = null
@@ -172,8 +176,10 @@ class MainActivity : AppCompatActivity() {
         binding.btnSaveSettings.setOnClickListener {
             val gasUrl = binding.etGasUrl.text.toString().trim()
             val addr = binding.etDefaultAddress.text.toString().trim()
+            val uploader = binding.etUploaderName.text.toString().trim()
             prefs.gasUrl = gasUrl
             prefs.defaultAddress = addr
+            prefs.uploaderName = uploader
             binding.etCaptureAddress.setText(addr)
             Toast.makeText(this, "✅ 設定已儲存", Toast.LENGTH_SHORT).show()
             selectTab(1)
@@ -295,13 +301,14 @@ class MainActivity : AppCompatActivity() {
 
         val address = binding.etCaptureAddress.text.toString().trim()
         val note = binding.etCaptureNote.text.toString().trim()
+        val uploader = prefs.uploaderName
         val base64Photos = capturedPhotos.map { it.base64 }
 
         binding.captureProgressBar.visibility = View.VISIBLE
         binding.btnSubmitCapture.isEnabled = false
 
         lifecycleScope.launch {
-            val result = gasRepo.uploadItem(gasUrl, base64Photos, address, note)
+            val result = gasRepo.uploadItem(gasUrl, base64Photos, address, note, uploader)
             binding.captureProgressBar.visibility = View.GONE
             binding.btnSubmitCapture.isEnabled = true
 
@@ -364,6 +371,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadInitialData() {
         binding.etGasUrl.setText(prefs.gasUrl)
+        binding.etUploaderName.setText(prefs.uploaderName)
         
         // 預設地址填入偏好設定與採集輸入框
         val defaultAddr = prefs.defaultAddress
@@ -641,21 +649,44 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        if (item.status?.trim()?.contains("刊登中") == true) {
+            Toast.makeText(this, "⚠️ 此物資正在刊登中，無法重新辨識！", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val now = System.currentTimeMillis()
+        if (isReprocessing) {
+            Toast.makeText(this, "已有其他物資正在重新辨識中，請稍候", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val elapsed = (now - lastReprocessTime) / 1000
+        if (elapsed < 10) {
+            val wait = 10 - elapsed
+            Toast.makeText(this, "辨識冷卻中，請等待 ${wait} 秒後再試", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        lastReprocessTime = now
+        isReprocessing = true
         binding.queueProgressBar.visibility = View.VISIBLE
         Toast.makeText(this, "⏳ 正在重新 AI 辨識第 ${item.row} 列物資...", Toast.LENGTH_SHORT).show()
 
         lifecycleScope.launch {
-            val result = gasRepo.reprocessRow(gasUrl, item.row)
-            binding.queueProgressBar.visibility = View.GONE
-            result.onSuccess {
-                Toast.makeText(this@MainActivity, "🎉 第 ${item.row} 列物資已重新辨識完成！", Toast.LENGTH_SHORT).show()
-                refreshQueue()
-            }.onFailure { err ->
-                AlertDialog.Builder(this@MainActivity)
-                    .setTitle("❌ 重新辨識失敗")
-                    .setMessage(err.message ?: "發生未知的錯誤")
-                    .setPositiveButton("確定", null)
-                    .show()
+            try {
+                val result = gasRepo.reprocessRow(gasUrl, item.row)
+                result.onSuccess {
+                    Toast.makeText(this@MainActivity, "🎉 第 ${item.row} 列物資已重新辨識完成！", Toast.LENGTH_SHORT).show()
+                    refreshQueue(force = true)
+                }.onFailure { err ->
+                    AlertDialog.Builder(this@MainActivity)
+                        .setTitle("❌ 重新辨識失敗")
+                        .setMessage(err.message ?: "發生未知的錯誤")
+                        .setPositiveButton("確定", null)
+                        .show()
+                }
+            } finally {
+                binding.queueProgressBar.visibility = View.GONE
+                isReprocessing = false
             }
         }
     }

@@ -306,19 +306,23 @@ class GasRepository {
         gasUrl: String,
         photosBase64: List<String>,
         address: String,
-        note: String
+        note: String,
+        uploader: String = ""
     ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             if (gasUrl.isBlank()) {
                 return@withContext Result.failure(IllegalArgumentException("尚未設定 Google Apps Script 網址"))
             }
 
-            val payloadMap = mapOf(
+            val payloadMap = mutableMapOf<String, Any>(
                 "action" to "uploadItem",
                 "photos" to photosBase64,
                 "address" to address,
                 "note" to note
             )
+            if (uploader.isNotBlank()) {
+                payloadMap["uploader"] = uploader
+            }
             val jsonPayload = gson.toJson(payloadMap)
             val mediaType = "application/json; charset=utf-8".toMediaType()
             val requestBody = jsonPayload.toRequestBody(mediaType)

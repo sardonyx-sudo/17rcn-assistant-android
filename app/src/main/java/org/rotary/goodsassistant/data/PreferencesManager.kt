@@ -21,9 +21,14 @@ class PreferencesManager(context: Context) {
         }
         set(value) = prefs.edit().putString(KEY_DEFAULT_ADDRESS, value.trim()).apply()
 
+    var uploaderName: String
+        get() = prefs.getString(KEY_UPLOADER_NAME, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_UPLOADER_NAME, value.trim()).apply()
+
     companion object {
         private const val KEY_GAS_URL = "rcn_gas_url"
         private const val KEY_DEFAULT_ADDRESS = "rcn_default_address"
+        private const val KEY_UPLOADER_NAME = "rcn_uploader_name"
 
         // 自用測試預設值
         const val DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbxmQqWQK44VN-OCoGKM5_0ekS_k-n1iDbXuU_e0L8KYVbppMWCR7iVA_KePH_pltrly/exec"
