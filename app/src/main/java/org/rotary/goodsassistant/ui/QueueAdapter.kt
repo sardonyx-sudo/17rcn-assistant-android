@@ -44,7 +44,12 @@ class QueueAdapter(
                 cat1.ifBlank { "未分類" }
             }
             binding.tvCardCategory.text = catText
-            binding.tvCardQuantity.text = "數量：${item.quantityStr}"
+
+            val condText = if (item.condition?.lowercase() == "new") "全新未拆" else "二手良品"
+            val priceVal = item.priceStr.ifBlank { "0" }
+            val priceText = "NT$ $priceVal"
+            val qtyText = item.quantityStr.ifBlank { "1" }
+            binding.tvCardAttributes.text = "📦 $condText ｜ $priceText ｜ 數量：$qtyText 件"
 
             val uploaderRaw = item.uploader?.trim() ?: ""
             val isLegacyOrEmpty = uploaderRaw.isEmpty() || uploaderRaw.contains("App/採集") || uploaderRaw.contains("採集端")

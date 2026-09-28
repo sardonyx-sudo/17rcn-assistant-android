@@ -17,94 +17,68 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- 頂部分類與數量標籤 + 刊登中鎖定標記 (使用 RelativeLayout 固定右側，確保右上徽章不被擠出螢幕) -->
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        <!-- 第 1 排：分類標籤（獨佔通欄，不受擠壓） -->
+        <TextView
+            android:id="@+id/tvCardCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="家電生活"
+            android:textColor="@color/badge_text"
+            android:background="@drawable/badge_bg"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:maxLines="2"
+            android:ellipsize="end" />
 
-            <!-- 右側徽章容器 (固定最右側，優先排版，確保不被擠出螢幕) -->
-            <LinearLayout
-                android:id="@+id/layoutBadges"
+        <!-- 第 2 排：靠右顯示 (狀態小徽章 + By：username) -->
+        <LinearLayout
+            android:id="@+id/layoutMetaRow2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end|center_vertical"
+            android:layout_marginTop="6dp">
+
+            <TextView
+                android:id="@+id/tvCardProcessingBadge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="8dp"
-                android:orientation="horizontal">
+                android:layout_marginEnd="6dp"
+                android:text="@string/badge_status_processing"
+                android:textColor="@color/badge_processing_text"
+                android:background="@drawable/badge_processing_bg"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="3dp"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
 
-                <TextView
-                    android:id="@+id/tvCardProcessingBadge"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/badge_status_processing"
-                    android:textColor="@color/badge_processing_text"
-                    android:background="@drawable/badge_processing_bg"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="3dp"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:visibility="gone" />
-
-                <TextView
-                    android:id="@+id/tvCardLockedBadge"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/badge_status_locked"
-                    android:textColor="@color/badge_locked_text"
-                    android:background="@drawable/badge_locked_bg"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="3dp"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:visibility="gone" />
-            </LinearLayout>
-
-            <!-- 左側分類與數量 (受限於右側徽章容器，自動加省略號) -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tvCardLockedBadge"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toStartOf="@id/layoutBadges"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_marginEnd="6dp"
+                android:text="@string/badge_status_locked"
+                android:textColor="@color/badge_locked_text"
+                android:background="@drawable/badge_locked_bg"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="3dp"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
 
-                <TextView
-                    android:id="@+id/tvCardCategory"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="家電生活"
-                    android:textColor="@color/badge_text"
-                    android:background="@drawable/badge_bg"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="4dp"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
-
-                <TextView
-                    android:id="@+id/tvCardQuantity"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="數量：1"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    android:maxLines="1" />
-
-                <TextView
-                    android:id="@+id/tvCardUploader"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="By："
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
-            </LinearLayout>
-        </RelativeLayout>
+            <TextView
+                android:id="@+id/tvCardUploader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="By："
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </LinearLayout>
 
         <!-- 物資品名標題 -->
         <TextView
@@ -115,7 +89,7 @@
             android:textColor="@color/text_primary"
             android:textSize="17sp"
             android:textStyle="bold"
-            android:layout_marginTop="10dp" />
+            android:layout_marginTop="8dp" />
 
         <!-- 所在地址 -->
         <TextView
@@ -126,6 +100,16 @@
             android:textColor="@color/text_secondary"
             android:textSize="13sp"
             android:layout_marginTop="6dp" />
+
+        <!-- 規格屬性（新舊 / 金額 / 數量）比照網頁版 -->
+        <TextView
+            android:id="@+id/tvCardAttributes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📦 二手良品 ｜ NT$ 0 ｜ 數量：1 件"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp" />
 
         <!-- 說明簡述 -->
         <TextView
