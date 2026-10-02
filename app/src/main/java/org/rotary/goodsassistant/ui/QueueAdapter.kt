@@ -4,15 +4,23 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
 import org.rotary.goodsassistant.R
+import org.rotary.goodsassistant.data.ImageCacheManager
 import org.rotary.goodsassistant.databinding.ItemGoodsCardBinding
 import org.rotary.goodsassistant.model.GoodsItem
+import org.rotary.goodsassistant.model.PhotoItem
+import org.rotary.goodsassistant.util.ImageLoader
 
 class QueueAdapter(
+    private val scope: CoroutineScope,
+    private val imageCacheManager: ImageCacheManager? = null,
+    private val getGasUrl: () -> String = { "" },
     private val onPublishClick: (GoodsItem) -> Unit,
     private val onUnlockClick: (GoodsItem) -> Unit,
     private val onReprocessClick: (GoodsItem) -> Unit,
-    private val onDeleteClick: (GoodsItem) -> Unit
+    private val onDeleteClick: (GoodsItem) -> Unit,
+    private val onPhotoClick: (PhotoItem, GoodsItem, Int) -> Unit = { _, _, _ -> }
 ) : RecyclerView.Adapter<QueueAdapter.ViewHolder>() {
 
     private val items = mutableListOf<GoodsItem>()
@@ -57,6 +65,37 @@ class QueueAdapter(
             binding.tvCardUploader.text = "By：$uploaderDisplay"
 
             binding.tvCardTitle.text = item.title?.ifBlank { null } ?: "（無品名）"
+
+            // 物資相片縮圖處理 (最多 3 張，比照網頁版可點擊開啟大圖預覽)
+            val photos = item.photos
+            if (photos.isNotEmpty()) {
+                binding.layoutCardPhotos.visibility = android.view.View.VISIBLE
+
+                val thumbCards = listOf(binding.cardThumb1, binding.cardThumb2, binding.cardThumb3)
+                val thumbViews = listOf(binding.ivThumb1, binding.ivThumb2, binding.ivThumb3)
+
+                for (i in 0 until 3) {
+                    if (i < photos.size) {
+                        val photo = photos[i]
+                        thumbCards[i].visibility = android.view.View.VISIBLE
+                        ImageLoader.loadThumbnail(
+                            imageView = thumbViews[i],
+                            photo = photo,
+                            scope = scope,
+                            imageCacheManager = imageCacheManager,
+                            gasUrl = getGasUrl()
+                        )
+                        thumbCards[i].setOnClickListener {
+                            onPhotoClick(photo, item, i)
+                        }
+                    } else {
+                        thumbCards[i].visibility = android.view.View.GONE
+                    }
+                }
+            } else {
+                binding.layoutCardPhotos.visibility = android.view.View.GONE
+            }
+
             binding.tvCardAddress.text = if (!item.address.isNullOrBlank()) "📍 ${item.address}" else "📍 無指定地址"
             binding.tvCardDesc.text = if (!item.description.isNullOrBlank()) item.description else "（無說明）"
 

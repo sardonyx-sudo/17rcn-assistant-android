@@ -91,6 +91,87 @@
             android:textStyle="bold"
             android:layout_marginTop="8dp" />
 
+        <!-- 物資相片縮圖列 (最多 3 張，比照網頁版可點擊開啟大圖預覽) -->
+        <LinearLayout
+            android:id="@+id/layoutCardPhotos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:visibility="gone">
+
+            <!-- 縮圖 1 -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardThumb1"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/border_color"
+                app:cardBackgroundColor="@color/card_thumb_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/ivThumb1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="物資相片 1" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 縮圖 2 -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardThumb2"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/border_color"
+                app:cardBackgroundColor="@color/card_thumb_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/ivThumb2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="物資相片 2" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 縮圖 3 -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardThumb3"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/border_color"
+                app:cardBackgroundColor="@color/card_thumb_bg"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/ivThumb3"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="物資相片 3" />
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
         <!-- 所在地址 -->
         <TextView
             android:id="@+id/tvCardAddress"

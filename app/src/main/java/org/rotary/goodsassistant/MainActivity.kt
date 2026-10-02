@@ -14,7 +14,10 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.app.Dialog
 import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
@@ -34,10 +37,12 @@ import org.rotary.goodsassistant.data.PreferencesManager
 import org.rotary.goodsassistant.data.QueueCacheManager
 import org.rotary.goodsassistant.databinding.ActivityMainBinding
 import org.rotary.goodsassistant.model.GoodsItem
+import org.rotary.goodsassistant.model.PhotoItem
 import org.rotary.goodsassistant.ui.QueueAdapter
 import org.rotary.goodsassistant.util.CompressedPhoto
 import org.rotary.goodsassistant.util.GoodsInjector
 import org.rotary.goodsassistant.util.ImageCompressor
+import org.rotary.goodsassistant.util.ImageLoader
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -115,12 +120,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupViews() {
-        // 1. RecyclerView 待刊佇列
+        // 1. RecyclerView 待刊佇列 (支援相片縮圖非同步載入與點擊大圖預覽)
         queueAdapter = QueueAdapter(
+            scope = lifecycleScope,
+            imageCacheManager = imageCache,
+            getGasUrl = { prefs.gasUrl },
             onPublishClick = { item -> startPublishItem(item) },
             onUnlockClick = { item -> handleUnlockItem(item) },
             onReprocessClick = { item -> reprocessItem(item) },
-            onDeleteClick = { item -> confirmDeleteItem(item) }
+            onDeleteClick = { item -> confirmDeleteItem(item) },
+            onPhotoClick = { photo, item, photoIndex -> showPhotoLightbox(photo, item, photoIndex) }
         )
         binding.rvQueue.layoutManager = LinearLayoutManager(this)
         binding.rvQueue.adapter = queueAdapter
@@ -790,6 +799,53 @@ class MainActivity : AppCompatActivity() {
                     .show()
             }
         }
+    }
+
+    /**
+     * 開啟物資相片全螢幕大圖燈箱 (Lightbox 預覽)，比照網頁版體驗
+     */
+    private fun showPhotoLightbox(photo: PhotoItem, item: GoodsItem, photoIndex: Int) {
+        val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        dialog.setContentView(R.layout.dialog_photo_lightbox)
+
+        val ivLarge = dialog.findViewById<ImageView>(R.id.ivLightboxLarge)
+        val pbLoading = dialog.findViewById<ProgressBar>(R.id.pbLightboxLoading)
+        val tvTitle = dialog.findViewById<TextView>(R.id.tvLightboxTitle)
+        val tvIndex = dialog.findViewById<TextView>(R.id.tvLightboxIndex)
+        val btnClose = dialog.findViewById<View>(R.id.btnLightboxClose)
+        val layoutRoot = dialog.findViewById<View>(R.id.layoutLightboxRoot)
+
+        val totalPhotos = item.photos.size
+        tvTitle.text = item.title?.ifBlank { "物資相片" } ?: "物資相片"
+        tvIndex.text = "${photoIndex + 1} / $totalPhotos"
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        layoutRoot.setOnClickListener { dialog.dismiss() }
+        ivLarge.setOnClickListener { /* 點擊大圖本身不關閉，防誤觸 */ }
+
+        // 若記憶體已有縮圖，先展示作為載入過渡，避免黑屏
+        val thumbCacheKey = photo.fileId ?: photo.id ?: photo.thumbnailUrl ?: photo.originalUrl ?: ""
+        val cachedThumb = ImageLoader.getCachedBitmap(thumbCacheKey)
+        if (cachedThumb != null) {
+            ivLarge.setImageBitmap(cachedThumb)
+        }
+
+        lifecycleScope.launch {
+            pbLoading.visibility = View.VISIBLE
+            val bitmap = ImageLoader.loadLargeBitmap(
+                photo = photo,
+                imageCacheManager = imageCache,
+                gasUrl = prefs.gasUrl
+            )
+            if (bitmap != null) {
+                ivLarge.setImageBitmap(bitmap)
+            } else if (cachedThumb == null) {
+                Toast.makeText(this@MainActivity, "相片載入失敗，請檢查網路連線", Toast.LENGTH_SHORT).show()
+            }
+            pbLoading.visibility = View.GONE
+        }
+
+        dialog.show()
     }
 
     @Deprecated("Deprecated in Java")

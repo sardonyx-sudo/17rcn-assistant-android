@@ -13,6 +13,7 @@
     <color name="text_primary">#2D2620</color>
     <color name="text_secondary">#7A7067</color>
     <color name="border_color">#E2DBD0</color>
+    <color name="card_thumb_bg">#F0ECE6</color>
 
     <!-- 狀態標籤 (燕麥金底 + 焦糖深褐字) -->
     <color name="badge_bg">#F2EBD9</color>
